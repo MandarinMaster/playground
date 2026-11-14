@@ -44,7 +44,7 @@ export default function Home() {
   const [score, setScore] = useState(0);
   const [totalStars, setTotalStars] = useState(0);
   const [chosen, setChosen] = useState<string | null>(null);
-  const [mathQuestion, setMathQuestion] = useState(makeMathQuestion);
+  const [mathQuestion, setMathQuestion] = useState({ question: "Was ist 7 + 5?", answers: ["10", "12", "13"], correct: "12" });
 
   useEffect(() => {
     const saved = window.localStorage.getItem("playground-stars");
@@ -139,7 +139,7 @@ export default function Home() {
               <div className="eyebrow">{selected.title.toUpperCase()}</div>
               <h3>{currentQuestion?.question}</h3>
               <div className="answer-grid">
-                {currentQuestion?.answers.map((answerOption) => {
+                {currentQuestion && currentQuestion.answers.map((answerOption) => {
                   const isCorrect = answerOption === currentQuestion.correct;
                   const isChosen = answerOption === chosen;
                   return <button key={answerOption} className={`answer-button ${chosen && isCorrect ? "correct" : ""} ${isChosen && !isCorrect ? "incorrect" : ""}`} onClick={() => answer(answerOption)} disabled={!!chosen}>{answerOption}</button>;
