@@ -91,7 +91,7 @@ export default function Home() {
       setMessage("Huch, das war sie nicht. Versuch's nochmal!");
       playTone([190, 145], 0.16, "triangle");
       window.setTimeout(() => {
-        setMessage(prompts[promptIndex % prompts.length](target));
+        setMessage(prompts[Math.floor(Math.random() * prompts.length)](target));
       }, 1100);
     }
   }
