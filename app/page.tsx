@@ -20,51 +20,82 @@ function shuffle<T,>(items: T[]) {
 }
 
 let sharedAudioContext: AudioContext | null = null;
-async function getAudioContext() {
+
+function getAudioContext() {
   const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
   if (!AudioContextClass) return null;
-  sharedAudioContext ??= new AudioContextClass();
-  if (sharedAudioContext.state === "suspended") await sharedAudioContext.resume();
+  if (!sharedAudioContext || sharedAudioContext.state === "closed") {
+    sharedAudioContext = new AudioContextClass();
+  }
+  // Resume synchronously inside the tap handler so mobile browsers keep the user gesture.
+  if (sharedAudioContext.state === "suspended") void sharedAudioContext.resume();
   return sharedAudioContext;
 }
-async function playTone(frequencies: number[], duration: number, wave: OscillatorType = "sine") {
+
+function playTone(frequencies: number[], duration: number, wave: OscillatorType = "sine") {
   try {
-    const context = await getAudioContext();
+    const context = getAudioContext();
     if (!context) return;
-    const startAt = context.currentTime + 0.02;
-    frequencies.forEach((frequency,index) => {
-      const oscillator = context.createOscillator(), gain = context.createGain();
-      oscillator.type = wave; oscillator.frequency.setValueAtTime(frequency,startAt+index*duration);
-      gain.gain.setValueAtTime(0.0001,startAt+index*duration);
-      gain.gain.exponentialRampToValueAtTime(0.16,startAt+index*duration+0.025);
-      gain.gain.exponentialRampToValueAtTime(0.0001,startAt+(index+1)*duration);
-      oscillator.connect(gain); gain.connect(context.destination);
-      oscillator.start(startAt+index*duration); oscillator.stop(startAt+(index+1)*duration);
+    const startAt = context.currentTime + 0.04;
+    frequencies.forEach((frequency, index) => {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = wave;
+      oscillator.frequency.setValueAtTime(frequency, startAt + index * duration);
+      gain.gain.setValueAtTime(0.0001, startAt + index * duration);
+      gain.gain.exponentialRampToValueAtTime(0.22, startAt + index * duration + 0.025);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startAt + (index + 1) * duration);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start(startAt + index * duration);
+      oscillator.stop(startAt + (index + 1) * duration);
     });
-  } catch { /* Browser audio may be unavailable. */ }
+  } catch {
+    // Audio may be unavailable in the current browser or device settings.
+  }
 }
-async function playCelebration() {
+
+function playCelebration() {
   try {
-    const context = await getAudioContext();
+    const context = getAudioContext();
     if (!context) return;
-    const melody = [659.25,783.99,987.77,1318.5,1174.66,1318.5,1567.98,1760,1567.98,2093];
-    const beat = 0.19, startAt = context.currentTime + 0.03;
-    melody.forEach((frequency,index) => {
-      const at = startAt + index*beat;
-      [[1,0.19],[2,0.055]].forEach(([multiplier,volume]) => {
-        const oscillator = context.createOscillator(), gain = context.createGain();
-        oscillator.type = "sine"; oscillator.frequency.setValueAtTime(frequency*multiplier,at);
-        gain.gain.setValueAtTime(0.0001,at); gain.gain.exponentialRampToValueAtTime(volume,at+0.018); gain.gain.exponentialRampToValueAtTime(0.0001,at+0.32);
-        oscillator.connect(gain); gain.connect(context.destination); oscillator.start(at); oscillator.stop(at+0.34);
+    const melody = [659.25, 783.99, 987.77, 1318.5, 1174.66, 1318.5, 1567.98, 1760, 1567.98, 2093];
+    const beat = 0.2;
+    const startAt = context.currentTime + 0.06;
+    melody.forEach((frequency, index) => {
+      const at = startAt + index * beat;
+      // Bright lead plus a soft octave shimmer.
+      ([{ multiple: 1, volume: 0.24, type: "triangle" as OscillatorType }, { multiple: 2, volume: 0.065, type: "sine" as OscillatorType }]).forEach((voice) => {
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        oscillator.type = voice.type;
+        oscillator.frequency.setValueAtTime(frequency * voice.multiple, at);
+        gain.gain.setValueAtTime(0.0001, at);
+        gain.gain.exponentialRampToValueAtTime(voice.volume, at + 0.025);
+        gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.36);
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+        oscillator.start(at);
+        oscillator.stop(at + 0.38);
       });
     });
-    [523.25,659.25,783.99,1046.5].forEach((frequency) => {
-      const oscillator = context.createOscillator(), gain = context.createGain();
-      oscillator.type = "triangle"; oscillator.frequency.value = frequency;
-      gain.gain.setValueAtTime(0.0001,startAt+1.45); gain.gain.exponentialRampToValueAtTime(0.045,startAt+1.7); gain.gain.exponentialRampToValueAtTime(0.0001,startAt+2.25);
-      oscillator.connect(gain); gain.connect(context.destination); oscillator.start(startAt+1.45); oscillator.stop(startAt+2.3);
+    // Warm major chord and sparkling high notes at the end.
+    [523.25, 659.25, 783.99, 1046.5].forEach((frequency) => {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = "sine";
+      oscillator.frequency.value = frequency;
+      gain.gain.setValueAtTime(0.0001, startAt + 1.55);
+      gain.gain.exponentialRampToValueAtTime(0.075, startAt + 1.8);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startAt + 2.55);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start(startAt + 1.55);
+      oscillator.stop(startAt + 2.6);
     });
-  } catch { /* Browser audio may be unavailable. */ }
+  } catch {
+    // Audio may be unavailable in the current browser or device settings.
+  }
 }
 
 export default function Home() {
