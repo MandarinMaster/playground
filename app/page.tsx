@@ -19,28 +19,52 @@ function shuffle<T,>(items: T[]) {
   return result;
 }
 
-function playTone(frequencies: number[], duration: number, wave: OscillatorType = "sine") {
+let sharedAudioContext: AudioContext | null = null;
+async function getAudioContext() {
+  const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AudioContextClass) return null;
+  sharedAudioContext ??= new AudioContextClass();
+  if (sharedAudioContext.state === "suspended") await sharedAudioContext.resume();
+  return sharedAudioContext;
+}
+async function playTone(frequencies: number[], duration: number, wave: OscillatorType = "sine") {
   try {
-    const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AudioContextClass) return;
-    const context = new AudioContextClass();
-    frequencies.forEach((frequency, index) => {
-      const oscillator = context.createOscillator();
-      const gain = context.createGain();
-      oscillator.type = wave;
-      oscillator.frequency.value = frequency;
-      gain.gain.setValueAtTime(0.0001, context.currentTime + index * duration);
-      gain.gain.exponentialRampToValueAtTime(0.12, context.currentTime + index * duration + 0.025);
-      gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + (index + 1) * duration);
-      oscillator.connect(gain);
-      gain.connect(context.destination);
-      oscillator.start(context.currentTime + index * duration);
-      oscillator.stop(context.currentTime + (index + 1) * duration);
+    const context = await getAudioContext();
+    if (!context) return;
+    const startAt = context.currentTime + 0.02;
+    frequencies.forEach((frequency,index) => {
+      const oscillator = context.createOscillator(), gain = context.createGain();
+      oscillator.type = wave; oscillator.frequency.setValueAtTime(frequency,startAt+index*duration);
+      gain.gain.setValueAtTime(0.0001,startAt+index*duration);
+      gain.gain.exponentialRampToValueAtTime(0.16,startAt+index*duration+0.025);
+      gain.gain.exponentialRampToValueAtTime(0.0001,startAt+(index+1)*duration);
+      oscillator.connect(gain); gain.connect(context.destination);
+      oscillator.start(startAt+index*duration); oscillator.stop(startAt+(index+1)*duration);
     });
-    window.setTimeout(() => context.close(), (frequencies.length * duration + 0.2) * 1000);
-  } catch {
-    // Audio is an enhancement; the game remains playable if it is unavailable.
-  }
+  } catch { /* Browser audio may be unavailable. */ }
+}
+async function playCelebration() {
+  try {
+    const context = await getAudioContext();
+    if (!context) return;
+    const melody = [659.25,783.99,987.77,1318.5,1174.66,1318.5,1567.98,1760,1567.98,2093];
+    const beat = 0.19, startAt = context.currentTime + 0.03;
+    melody.forEach((frequency,index) => {
+      const at = startAt + index*beat;
+      [[1,0.19],[2,0.055]].forEach(([multiplier,volume]) => {
+        const oscillator = context.createOscillator(), gain = context.createGain();
+        oscillator.type = "sine"; oscillator.frequency.setValueAtTime(frequency*multiplier,at);
+        gain.gain.setValueAtTime(0.0001,at); gain.gain.exponentialRampToValueAtTime(volume,at+0.018); gain.gain.exponentialRampToValueAtTime(0.0001,at+0.32);
+        oscillator.connect(gain); gain.connect(context.destination); oscillator.start(at); oscillator.stop(at+0.34);
+      });
+    });
+    [523.25,659.25,783.99,1046.5].forEach((frequency) => {
+      const oscillator = context.createOscillator(), gain = context.createGain();
+      oscillator.type = "triangle"; oscillator.frequency.value = frequency;
+      gain.gain.setValueAtTime(0.0001,startAt+1.45); gain.gain.exponentialRampToValueAtTime(0.045,startAt+1.7); gain.gain.exponentialRampToValueAtTime(0.0001,startAt+2.25);
+      oscillator.connect(gain); gain.connect(context.destination); oscillator.start(startAt+1.45); oscillator.stop(startAt+2.3);
+    });
+  } catch { /* Browser audio may be unavailable. */ }
 }
 
 export default function Home() {
@@ -83,13 +107,13 @@ export default function Home() {
     if (digit === target) {
       setCelebrating(true);
       setMessage("Jaaaa! Richtig! 🎉");
-      playTone([523.25, 659.25, 783.99, 1046.5, 1318.5], 0.22);
+      playCelebration();
       window.setTimeout(() => {
         setCelebrating(false);
         setLayout(shuffle(digits));
         setRoundKey((key) => key + 1);
         askQuestion();
-      }, 3000);
+      }, 4700);
     } else {
       setMessage("Huch, das war sie nicht. Versuch's nochmal!");
       playTone([190, 145], 0.16, "triangle");
@@ -139,8 +163,12 @@ export default function Home() {
           </div>
           {celebrating && (
             <div className="party-overlay" aria-hidden="true">
-              {Array.from({ length: 90 }, (_, index) => (
-                <i key={index} style={{ left: `${(index * 37) % 100}%`, animationDelay: `${(index % 18) * 0.045}s`, backgroundColor: colors[index % colors.length], transform: `rotate(${index * 31}deg)` }} />
+              <div className="party-message">SUPER GEMACHT!</div>
+              {Array.from({ length: 190 }, (_, index) => (
+                <i className={index % 3 === 0 ? "confetti-star" : index % 3 === 1 ? "confetti-ribbon" : "confetti-piece"} key={index} style={{ left: `${(index * 37) % 100}%`, animationDelay: `${(index % 30) * 0.055}s`, backgroundColor: colors[index % colors.length], transform: `rotate(${index * 31}deg)` }} />
+              ))}
+              {Array.from({ length: 34 }, (_, index) => (
+                <b className="party-sparkle" key={index} style={{ left: `${(index * 61 + 7) % 100}%`, top: `${(index * 43 + 9) % 92}%`, animationDelay: `${(index % 12) * 0.13}s` }}>✦</b>
               ))}
             </div>
           )}
