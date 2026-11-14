@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 
 const digits = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 const prompts = [
@@ -128,7 +128,7 @@ export default function Home() {
               <button
                 className="digit-button"
                 key={digit}
-                style={{ color: colors[Number(digit)], "--drop-delay": `${index * 55}ms`, "--drop-x": `${(Math.random() - 0.5) * 150}px`, "--drop-rotate": `${(Math.random() - 0.5) * 100}deg`, "--rest-rotate": `${(Math.random() - 0.5) * 12}deg` } as React.CSSProperties}
+                style={{ color: colors[Number(digit)], "--drop-delay": `${index * 55}ms`, "--drop-x": `${((index * 47) % 150) - 75}px`, "--drop-rotate": `${((index * 29) % 100) - 50}deg`, "--rest-rotate": `${((index * 7) % 13) - 6}deg` } as CSSProperties}
                 onClick={() => chooseDigit(digit)}
                 disabled={celebrating}
                 aria-label={`Zahl ${digit}`}
