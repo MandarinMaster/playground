@@ -49,6 +49,7 @@ export default function Home() {
   const [target, setTarget] = useState("5");
   const [celebrating, setCelebrating] = useState(false);
   const [message, setMessage] = useState("");
+  const [roundKey, setRoundKey] = useState(0);
 
   function speak(text: string) {
     if (!("speechSynthesis" in window)) return;
@@ -70,6 +71,7 @@ export default function Home() {
 
   function startGame() {
     setLayout(shuffle(digits));
+    setRoundKey((key) => key + 1);
     setPlaying(true);
     setCelebrating(false);
     setMessage("Pass gut auf!");
@@ -85,6 +87,7 @@ export default function Home() {
       window.setTimeout(() => {
         setCelebrating(false);
         setLayout(shuffle(digits));
+        setRoundKey((key) => key + 1);
         askQuestion();
       }, 3000);
     } else {
@@ -120,12 +123,12 @@ export default function Home() {
           </div>
           <h1 className="game-prompt" aria-live="polite">{message}</h1>
           <p className="game-hint">Tippe auf die richtige Zahl.</p>
-          <div className="digit-board">
+          <div className="digit-board" key={roundKey}>
             {layout.map((digit, index) => (
               <button
                 className="digit-button"
                 key={digit}
-                style={{ color: colors[Number(digit)], fontSize: `clamp(${index % 3 === 0 ? 43 : index % 3 === 1 ? 56 : 66}px, ${index % 3 === 0 ? 7 : index % 3 === 1 ? 8 : 9}vw, ${index % 3 === 0 ? 76 : index % 3 === 1 ? 92 : 108}px)`, transform: `rotate(${(index % 5 - 2) * 3}deg)` }}
+                style={{ color: colors[Number(digit)], "--drop-delay": `${index * 55}ms`, "--drop-x": `${(Math.random() - 0.5) * 150}px`, "--drop-rotate": `${(Math.random() - 0.5) * 100}deg`, "--rest-rotate": `${(Math.random() - 0.5) * 12}deg` } as React.CSSProperties}
                 onClick={() => chooseDigit(digit)}
                 disabled={celebrating}
                 aria-label={`Zahl ${digit}`}
