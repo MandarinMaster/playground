@@ -47,7 +47,6 @@ export default function Home() {
   const [playing, setPlaying] = useState(false);
   const [layout, setLayout] = useState(digits);
   const [target, setTarget] = useState("5");
-  const [promptIndex, setPromptIndex] = useState(0);
   const [celebrating, setCelebrating] = useState(false);
   const [message, setMessage] = useState("");
 
