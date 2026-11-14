@@ -19,6 +19,19 @@ function shuffle<T,>(items: T[]) {
   return result;
 }
 
+function makeScatter() {
+  const slots = shuffle(Array.from({ length: 10 }, (_, index) => index));
+  return Object.fromEntries(digits.map((digit, index) => {
+    const slot = slots[index];
+    const column = slot % 5;
+    const row = Math.floor(slot / 5);
+    return [digit, {
+      left: `${5 + column * 19 + (Math.random() * 9 - 4.5)}%`,
+      top: `${8 + row * 48 + (Math.random() * 22 - 11)}%`,
+    }];
+  })) as Record<string, { left: string; top: string }>;
+}
+
 let sharedAudioContext: AudioContext | null = null;
 
 function getAudioContext() {
@@ -101,6 +114,7 @@ function playCelebration() {
 export default function Home() {
   const [playing, setPlaying] = useState(false);
   const [layout, setLayout] = useState(digits);
+  const [scatter, setScatter] = useState<Record<string, { left: string; top: string }>>(() => makeScatter());
   const [target, setTarget] = useState("5");
   const [celebrating, setCelebrating] = useState(false);
   const [message, setMessage] = useState("");
@@ -126,6 +140,7 @@ export default function Home() {
 
   function startGame() {
     setLayout(shuffle(digits));
+    setScatter(makeScatter());
     setRoundKey((key) => key + 1);
     setPlaying(true);
     setCelebrating(false);
@@ -142,6 +157,7 @@ export default function Home() {
       window.setTimeout(() => {
         setCelebrating(false);
         setLayout(shuffle(digits));
+        setScatter(makeScatter());
         setRoundKey((key) => key + 1);
         askQuestion();
       }, 4700);
@@ -183,7 +199,7 @@ export default function Home() {
               <button
                 className="digit-button"
                 key={digit}
-                style={{ color: colors[Number(digit)], "--drop-delay": `${index * 55}ms`, "--drop-x": `${((index * 47) % 150) - 75}px`, "--drop-rotate": `${((index * 29) % 100) - 50}deg`, "--rest-rotate": `${((index * 7) % 13) - 6}deg` } as CSSProperties}
+                style={{ color: colors[Number(digit)], left: scatter[digit]?.left, top: scatter[digit]?.top, "--drop-delay": `${index * 55}ms`, "--drop-x": `${((index * 47) % 150) - 75}px`, "--drop-rotate": `${((index * 29) % 100) - 50}deg`, "--rest-rotate": `${((index * 7) % 13) - 6}deg` } as CSSProperties}
                 onClick={() => chooseDigit(digit)}
                 disabled={celebrating}
                 aria-label={`Zahl ${digit}`}
