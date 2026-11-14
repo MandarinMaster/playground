@@ -26,8 +26,8 @@ function makeScatter() {
     const column = slot % 5;
     const row = Math.floor(slot / 5);
     return [digit, {
-      left: `${5 + column * 19 + (Math.random() * 9 - 4.5)}%`,
-      top: `${8 + row * 48 + (Math.random() * 22 - 11)}%`,
+      left: `${4 + column * 17.5 + (Math.random() * 9 - 4.5)}%`,
+      top: `${8 + row * 40 + (Math.random() * 16 - 8)}%`,
     }];
   })) as Record<string, { left: string; top: string }>;
 }
