@@ -46,6 +46,45 @@ function imageLetter(filename: string) {
   return filename.normalize("NFC").charAt(0).toLocaleUpperCase("de-DE");
 }
 
+const lowercaseCoverPositions: Record<string, [number, number, number, number]> = {
+  "Affe.jpg": [54, 22, 22, 15],
+  "Bär.jpg": [54, 13, 23, 17],
+  "Chamäleon.jpg": [53, 21, 22, 16],
+  "Delfin.jpg": [54, 12, 23, 17],
+  "Elefant.jpg": [55, 17, 23, 16],
+  "Fuchs.jpg": [54, 12, 23, 17],
+  "Giraffe.jpg": [53, 18, 24, 17],
+  "Hund.jpg": [52, 13, 21, 17],
+  "Igel.jpg": [51, 16, 18, 17],
+  "Jaguar.jpg": [52, 16, 19, 17],
+  "Katze.jpg": [55, 13, 20, 17],
+  "Löwe.jpg": [59, 12, 18, 17],
+  "Maus.jpg": [51, 17, 31, 17],
+  "Nashorn.jpg": [54, 17, 22, 17],
+  "Otter.jpg": [53, 17, 21, 17],
+  "Papagei.jpg": [55, 14, 22, 18],
+  "Qualle.jpg": [56, 18, 29, 23],
+  "Reh.jpg": [55, 16, 19, 18],
+  "Schaf.jpg": [55, 19, 19, 18],
+  "Tiger.jpg": [59, 15, 20, 18],
+  "Uhu.jpg": [54, 14, 22, 18],
+  "Vogel.jpg": [54, 14, 22, 18],
+  "Wal.jpg": [57, 18, 31, 19],
+  "Xaver.jpg": [54, 14, 22, 18],
+  "Yak.jpg": [54, 14, 22, 18],
+  "Zebra.jpg": [49, 21, 23, 17],
+};
+
+function lowercaseCoverStyle(filename: string): CSSProperties {
+  const [left, top, width, height] = lowercaseCoverPositions[filename] ?? [54, 14, 22, 18];
+  return {
+    "--cover-left": `${left}%`,
+    "--cover-top": `${top}%`,
+    "--cover-width": `${width}%`,
+    "--cover-height": `${height}%`,
+  } as CSSProperties;
+}
+
 function makeLetterRound(previousWord?: string) {
   const word = shuffle(spellingWords.filter((item) => item !== previousWord))[0];
   const correctLetters = [...new Set(word.toLocaleUpperCase("de-DE").split(""))];
@@ -289,24 +328,8 @@ export default function Home() {
               return <button key={filename} className={`picture-tile${selected ? " selected" : ""}${wrong ? " wrong" : ""}`}
                 onClick={() => chooseLetterPicture(filename)} disabled={selected || celebrating}
                 aria-label={`Bild mit dem Buchstaben ${letter}`}>
-                <span className="picture-image-wrap">
-                  <img
-                    src={`/bilder/${encodeURIComponent(filename)}`}
-                    alt={`Tierbild zum Buchstaben ${letter}`}
-                    onLoad={(event) => {
-                      const img = event.currentTarget;
-                      try {
-                        const canvas = document.createElement("canvas");
-                        canvas.width = 1;
-                        canvas.height = 1;
-                        const context = canvas.getContext("2d", { willReadFrequently: true });
-                        if (!context) return;
-                        context.drawImage(img, Math.floor(img.naturalWidth * 0.82), Math.floor(img.naturalHeight * 0.23), 1, 1, 0, 0, 1, 1);
-                        const [red, green, blue] = context.getImageData(0, 0, 1, 1).data;
-                        img.parentElement?.style.setProperty("--letter-cover", `rgb(${red}, ${green}, ${blue})`);
-                      } catch {}
-                    }}
-                  />
+                <span className="picture-image-wrap" style={lowercaseCoverStyle(filename)}>
+                  <img src={`/bilder/${encodeURIComponent(filename)}`} alt={`Tierbild zum Buchstaben ${letter}`} />
                   <span className="lowercase-cover" aria-hidden="true" />
                 </span>
               </button>;
