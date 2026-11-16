@@ -91,7 +91,7 @@ button.start-tile:hover { transform: translateY(-8px) rotateX(3deg) rotateY(-3de
   cursor: pointer;
   transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
 }
-.picture-tile img { display: block; width: 100%; height: 100%; object-fit: contain; border-radius: 14px; }
+.picture-tile img { display: block; width: auto !important; height: auto !important; max-width: 100%; max-height: 100%; object-fit: contain !important; object-position: center; border-radius: 14px; }
 .picture-tile:active { transform: scale(.96); }
 .picture-tile.selected {
   border-color: #43d68b;
@@ -114,5 +114,5 @@ button.start-tile:hover { transform: translateY(-8px) rotateX(3deg) rotateY(-3de
   .letter-game .game-hint { text-align: center; font-size: 13px; margin-bottom: 8px; }
   .letter-board { gap: 10px; margin-top: 10px; }
   .picture-tile { padding: 5px; border-radius: 16px; border-width: 2px; }
-  .picture-tile img { border-radius: 10px; }
+  .picture-tile img { max-width: 100%; max-height: 100%; border-radius: 10px; }
 }
