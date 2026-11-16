@@ -264,6 +264,21 @@ button.start-tile:hover { transform: translateY(-8px) rotateX(3deg) rotateY(-3de
 }
 
 
-/* Show all lowercase letters while the library artwork is being refined */
-.lowercase-cover { display: none !important; }
-.library-display-control, .library-toggle-lowercase { display: none !important; }
+
+/* Lowercase letters are controlled from the library; game tiles stay uncovered. */
+.lowercase-cover { display: none; }
+.library-screen:not(.show-lowercase) .lowercase-cover { display: block; }
+.library-display-control { display: flex; justify-content: flex-end; margin: 10px 0 0; }
+.library-toggle-lowercase {
+  border: 1px solid rgba(255,255,255,.75);
+  border-radius: 99px;
+  padding: 10px 17px;
+  background: rgba(255,255,255,.22);
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(65,30,100,.14);
+}
+@media(max-width:600px) {
+  .library-toggle-lowercase { padding: 9px 13px; font-size: 13px; }
+}
