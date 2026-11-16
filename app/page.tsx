@@ -47,7 +47,7 @@ function imageLetter(filename: string) {
 }
 
 const lowercaseCoverPositions: Record<string, [number, number, number, number]> = {
-  "Affe.jpg": [54, 22, 22, 15],
+  "Affe.jpg": [53.5, 22.7, 19.5, 13.2],
   "Bär.jpg": [54, 13, 23, 17],
   "Chamäleon.jpg": [53, 21, 22, 16],
   "Delfin.jpg": [54, 12, 23, 17],
