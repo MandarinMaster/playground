@@ -79,7 +79,7 @@ button.start-tile:hover { transform: translateY(-8px) rotateX(3deg) rotateY(-3de
 }
 .picture-tile {
   min-width: 0;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 3 / 4;
   display: grid;
   place-items: center;
   padding: 7px;
