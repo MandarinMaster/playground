@@ -169,6 +169,7 @@ function playCelebration() {
 export default function Home() {
   const [playing, setPlaying] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
+  const [showLowercaseInLibrary, setShowLowercaseInLibrary] = useState(false);
   const [enabledLetters, setEnabledLetters] = useState<string[]>(letterPictures.map(imageLetter));
   const [gameMode, setGameMode] = useState<"numbers" | "letters">("numbers");
   const [layout, setLayout] = useState(digits);
@@ -325,6 +326,7 @@ export default function Home() {
           </div>
           <h1 className="game-prompt">Deine Buchstaben</h1>
           <p className="game-hint">Wähle die Tierbilder aus, deren Buchstaben im Spiel vorkommen dürfen.</p>
+          <div className="library-display-control"><button className="library-toggle-lowercase" onClick={() => setShowLowercaseInLibrary((value) => !value)} aria-pressed={showLowercaseInLibrary}>{showLowercaseInLibrary ? "Kleinbuchstaben ausblenden" : "Kleinbuchstaben einblenden"}</button></div>
           <div className="library-grid">
             {letterPictures.map((filename) => {
               const letter = imageLetter(filename);
