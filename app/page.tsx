@@ -182,7 +182,7 @@ export default function Home() {
             <span className="tile-symbol" aria-hidden="true">✦</span>
             <span className="tile-number">Zahlen</span>
           </button>
-          <div className="start-tile tile-violet" aria-hidden="true"><span className="tile-symbol">♡</span><span className="tile-number">02</span></div>
+          <div className="start-tile tile-violet" aria-hidden="true"><span className="tile-symbol">♡</span><span className="tile-number">Buchstaben</span></div>
           <div className="start-tile tile-rose" aria-hidden="true"><span className="tile-symbol">✿</span><span className="tile-number">03</span></div>
           <div className="start-tile tile-lilac" aria-hidden="true"><span className="tile-symbol">☾</span><span className="tile-number">04</span></div>
         </div>
