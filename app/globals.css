@@ -66,3 +66,53 @@ button.start-tile:hover { transform: translateY(-8px) rotateX(3deg) rotateY(-3de
   .digit-board { min-height:390px; }
   .digit-button { width:19%; height:42%; border-radius:13px; font-size:clamp(52px,15vw,82px); }
 }
+
+
+/* Picture-based spelling game */
+.letter-game { min-height: min(820px, calc(100vh - 50px)); }
+.letter-board {
+  width: min(760px, 100%);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(12px, 2.5vw, 22px);
+  margin: 14px auto 8px;
+}
+.picture-tile {
+  min-width: 0;
+  aspect-ratio: 1 / 1;
+  display: grid;
+  place-items: center;
+  padding: 7px;
+  overflow: hidden;
+  border: 3px solid rgba(255,255,255,.8);
+  border-radius: 22px;
+  background: linear-gradient(145deg, #fff, #f5eaff);
+  box-shadow: 0 7px 0 rgba(91,43,139,.2), 0 13px 22px rgba(73,34,113,.2), inset 0 2px 4px rgba(255,255,255,.9);
+  cursor: pointer;
+  transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+.picture-tile img { display: block; width: 100%; height: 100%; object-fit: contain; border-radius: 14px; }
+.picture-tile:active { transform: scale(.96); }
+.picture-tile.selected {
+  border-color: #43d68b;
+  background: #e5ffef;
+  box-shadow: 0 0 0 4px rgba(67,214,139,.25), 0 7px 0 rgba(34,145,91,.25);
+  transform: scale(.96);
+}
+.picture-tile.wrong {
+  border-color: #ff5277;
+  background: #ffe8ee;
+  animation: tile-shake .28s ease-in-out;
+}
+.picture-tile:disabled { cursor: default; }
+.letter-progress { margin: 8px 0 0; color: white; font-size: 15px; font-weight: 900; text-shadow: 0 2px 8px rgba(70,30,100,.25); }
+@keyframes tile-shake { 0%,100% { transform:translateX(0); } 25% { transform:translateX(-5px); } 75% { transform:translateX(5px); } }
+
+@media(max-width:600px) {
+  .letter-game { min-height: calc(100vh - 48px); }
+  .letter-game .game-prompt { margin-top: 24px; }
+  .letter-game .game-hint { text-align: center; font-size: 13px; margin-bottom: 8px; }
+  .letter-board { gap: 10px; margin-top: 10px; }
+  .picture-tile { padding: 5px; border-radius: 16px; border-width: 2px; }
+  .picture-tile img { border-radius: 10px; }
+}
