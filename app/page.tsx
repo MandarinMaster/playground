@@ -281,7 +281,34 @@ export default function Home() {
 
   return (
     <main className="start-screen">
-      {!playing ? (
+      {!playing ? (showLibrary ? (
+        <section className="library-screen">
+          <div className="game-toolbar">
+            <button className="game-back" onClick={() => setShowLibrary(false)}>← Zurück</button>
+            <span className="game-label">BUCHSTABEN-BIBLIOTHEK</span>
+          </div>
+          <h1 className="game-prompt">Deine Buchstaben</h1>
+          <p className="game-hint">Wähle die Tierbilder aus, deren Buchstaben im Spiel vorkommen dürfen.</p>
+          <div className="library-grid">
+            {letterPictures.map((filename) => {
+              const letter = imageLetter(filename);
+              const active = enabledLetters.includes(letter);
+              return <button key={filename} className={`library-card${active ? " active" : ""}`} onClick={() => toggleLibraryLetter(letter)} aria-pressed={active} aria-label={`${letter} ${active ? "deaktivieren" : "aktivieren"}`}>
+                <span className="library-image-wrap" style={lowercaseCoverStyle(filename)}>
+                  <img src={`/bilder/${encodeURIComponent(filename)}`} alt={filename.replace(/\\.jpg$/i, "")} />
+                  <span className="lowercase-cover" aria-hidden="true" />
+                </span>
+                <span className="library-letter">{letter}</span>
+                <span className="library-check">{active ? "✓" : "+"}</span>
+              </button>;
+            })}
+          </div>
+          <div className="library-footer">
+            <span>{enabledLetters.length} von 26 Buchstaben ausgewählt</span>
+            <button className="library-done" onClick={() => setShowLibrary(false)}>Fertig</button>
+          </div>
+        </section>
+      ) : (
         <div className="tile-grid" aria-label="Startauswahl">
           <button className="start-tile tile-pink" onClick={startNumberGame} aria-label="Zahlen-Spiel starten">
             <span className="tile-symbol" aria-hidden="true">✦</span>
@@ -294,7 +321,7 @@ export default function Home() {
           <button className="start-tile tile-rose" onClick={() => setShowLibrary(true)} aria-label="Buchstaben-Bibliothek öffnen"><span className="tile-symbol">▤</span><span className="tile-number">Bibliothek</span></button>
           <div className="start-tile tile-lilac" aria-hidden="true"><span className="tile-symbol">☾</span><span className="tile-number">04</span></div>
         </div>
-      ) : gameMode === "numbers" ? (
+      )) : gameMode === "numbers" ? (
         <section className="number-game">
           <div className="game-toolbar">
             <button className="game-back" onClick={goHome}>← Zurück</button>
