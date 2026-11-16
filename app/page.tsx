@@ -209,7 +209,11 @@ export default function Home() {
   }
 
   function startLetterGame() {
-    const next = makeLetterRound();
+    const next = makeLetterRound(enabledLetters);
+    if (!next) {
+      setShowLibrary(true);
+      return;
+    }
     setLetterRound(next);
     setSelectedLetters([]);
     setWrongLetter(null);
@@ -257,7 +261,12 @@ export default function Home() {
       setMessage("Richtig geschrieben! 🎉");
       playCelebration();
       window.setTimeout(() => {
-        const next = makeLetterRound(letterRound.word);
+        const next = makeLetterRound(enabledLetters, letterRound.word) ?? makeLetterRound(enabledLetters);
+        if (!next) {
+          setPlaying(false);
+          setShowLibrary(true);
+          return;
+        }
         setLetterRound(next);
         setSelectedLetters([]);
         setWrongLetter(null);
@@ -273,6 +282,30 @@ export default function Home() {
     setCelebrating(false);
     setWrongLetter(null);
     window.speechSynthesis?.cancel();
+  }
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem("playground-enabled-letters");
+      if (saved) {
+        const parsed: unknown = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          setEnabledLetters(parsed.filter((letter): letter is string =>
+            typeof letter === "string" && letterPictures.some((file) => imageLetter(file) === letter)
+          ));
+        }
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try { window.localStorage.setItem("playground-enabled-letters", JSON.stringify(enabledLetters)); } catch {}
+  }, [enabledLetters]);
+
+  function toggleLibraryLetter(letter: string) {
+    setEnabledLetters((current) => current.includes(letter)
+      ? current.filter((item) => item !== letter)
+      : [...current, letter]);
   }
 
   useEffect(() => () => {
