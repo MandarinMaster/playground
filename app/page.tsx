@@ -10,6 +10,16 @@ const prompts = [
 ];
 const colors = ["#ff5ca8", "#7358e8", "#12a9a0", "#ff9b35", "#397fe8", "#e45c61", "#8d55c7", "#269b65", "#e17a25", "#3866b7"];
 
+const letterPictures = [
+  "Affe.jpg", "Ba\u0308r.jpg", "Chama\u0308leon.jpg", "Delfin.jpg", "Elefant.jpg",
+  "Fuchs.jpg", "Giraffe.jpg", "Hund.jpg", "Igel.jpg", "Jaguar.jpg", "Katze.jpg",
+  "Lo\u0308we.jpg", "Maus.jpg", "Nashorn.jpg", "Otter.jpg", "Papagei.jpg",
+  "Qualle.jpg", "Reh.jpg", "Schaf.jpg", "Tiger.jpg", "Uhu.jpg", "Vogel.jpg",
+  "Wal.jpg", "Xaver.jpg", "Yak.jpg", "Zebra.jpg",
+];
+
+const spellingWords = ["Mia", "Oma", "Opa", "Mama", "Papa", "Mimi", "Nina", "Tina", "Lama", "Hase", "Huhn", "Hund", "Katze", "Tiger", "Dino", "Lila", "Susi", "Lena"];
+
 function shuffle<T,>(items: T[]) {
   const result = [...items];
   for (let i = result.length - 1; i > 0; i--) {
@@ -32,15 +42,24 @@ function makeScatter() {
   })) as Record<string, { left: string; top: string }>;
 }
 
+function imageLetter(filename: string) {
+  return filename.normalize("NFC").charAt(0).toLocaleUpperCase("de-DE");
+}
+
+function makeLetterRound(previousWord?: string) {
+  const word = shuffle(spellingWords.filter((item) => item !== previousWord))[0];
+  const correctLetters = [...new Set(word.toLocaleUpperCase("de-DE").split(""))];
+  const correctPictures = correctLetters.map((letter) => letterPictures.find((file) => imageLetter(file) === letter)).filter(Boolean) as string[];
+  const distractors = shuffle(letterPictures.filter((file) => !correctLetters.includes(imageLetter(file)))).slice(0, 6 - correctPictures.length);
+  return { word, correctLetters, choices: shuffle([...correctPictures, ...distractors]) };
+}
+
 let sharedAudioContext: AudioContext | null = null;
 
 function getAudioContext() {
   const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
   if (!AudioContextClass) return null;
-  if (!sharedAudioContext || sharedAudioContext.state === "closed") {
-    sharedAudioContext = new AudioContextClass();
-  }
-  // Resume synchronously inside the tap handler so mobile browsers keep the user gesture.
+  if (!sharedAudioContext || sharedAudioContext.state === "closed") sharedAudioContext = new AudioContextClass();
   if (sharedAudioContext.state === "suspended") void sharedAudioContext.resume();
   return sharedAudioContext;
 }
@@ -63,9 +82,7 @@ function playTone(frequencies: number[], duration: number, wave: OscillatorType 
       oscillator.start(startAt + index * duration);
       oscillator.stop(startAt + (index + 1) * duration);
     });
-  } catch {
-    // Audio may be unavailable in the current browser or device settings.
-  }
+  } catch {}
 }
 
 function playCelebration() {
@@ -77,7 +94,6 @@ function playCelebration() {
     const startAt = context.currentTime + 0.06;
     melody.forEach((frequency, index) => {
       const at = startAt + index * beat;
-      // Bright lead plus a soft octave shimmer.
       ([{ multiple: 1, volume: 0.24, type: "triangle" as OscillatorType }, { multiple: 2, volume: 0.065, type: "sine" as OscillatorType }]).forEach((voice) => {
         const oscillator = context.createOscillator();
         const gain = context.createGain();
@@ -92,7 +108,6 @@ function playCelebration() {
         oscillator.stop(at + 0.38);
       });
     });
-    // Warm major chord and sparkling high notes at the end.
     [523.25, 659.25, 783.99, 1046.5].forEach((frequency) => {
       const oscillator = context.createOscillator();
       const gain = context.createGain();
@@ -106,22 +121,24 @@ function playCelebration() {
       oscillator.start(startAt + 1.55);
       oscillator.stop(startAt + 2.6);
     });
-  } catch {
-    // Audio may be unavailable in the current browser or device settings.
-  }
+  } catch {}
 }
 
 export default function Home() {
   const [playing, setPlaying] = useState(false);
+  const [gameMode, setGameMode] = useState<"numbers" | "letters">("numbers");
   const [layout, setLayout] = useState(digits);
   const [scatter, setScatter] = useState<Record<string, { left: string; top: string }>>(() => makeScatter());
   const [target, setTarget] = useState("5");
   const [celebrating, setCelebrating] = useState(false);
   const [message, setMessage] = useState("");
   const [roundKey, setRoundKey] = useState(0);
+  const [letterRound, setLetterRound] = useState(() => makeLetterRound());
+  const [selectedLetters, setSelectedLetters] = useState<string[]>([]);
+  const [wrongLetter, setWrongLetter] = useState<string | null>(null);
 
   function speak(text: string) {
-    if (!("speechSynthesis" in window)) return;
+    if (!( "speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "de-DE";
@@ -138,7 +155,8 @@ export default function Home() {
     window.setTimeout(() => speak(phrase), 120);
   }
 
-  function startGame() {
+  function startNumberGame() {
+    setGameMode("numbers");
     setLayout(shuffle(digits));
     setScatter(makeScatter());
     setRoundKey((key) => key + 1);
@@ -146,6 +164,19 @@ export default function Home() {
     setCelebrating(false);
     setMessage("Pass gut auf!");
     window.setTimeout(() => askQuestion(), 450);
+  }
+
+  function startLetterGame() {
+    const next = makeLetterRound();
+    setLetterRound(next);
+    setSelectedLetters([]);
+    setWrongLetter(null);
+    setCelebrating(false);
+    setGameMode("letters");
+    setPlaying(true);
+    const phrase = `Wie schreibt man ${next.word}?`;
+    setMessage(phrase);
+    window.setTimeout(() => speak(phrase), 180);
   }
 
   function chooseDigit(digit: string) {
@@ -164,10 +195,42 @@ export default function Home() {
     } else {
       setMessage("Huch, das war sie nicht. Versuch's nochmal!");
       playTone([190, 145], 0.16, "triangle");
-      window.setTimeout(() => {
-        setMessage(prompts[Math.floor(Math.random() * prompts.length)](target));
-      }, 1100);
+      window.setTimeout(() => setMessage(prompts[Math.floor(Math.random() * prompts.length)](target)), 1100);
     }
+  }
+
+  function chooseLetterPicture(filename: string) {
+    if (celebrating || selectedLetters.includes(filename)) return;
+    const letter = imageLetter(filename);
+    if (!letterRound.correctLetters.includes(letter)) {
+      setWrongLetter(filename);
+      playTone([190, 145], 0.16, "triangle");
+      window.setTimeout(() => setWrongLetter((current) => current === filename ? null : current), 850);
+      return;
+    }
+    const nextSelected = [...selectedLetters, filename];
+    setSelectedLetters(nextSelected);
+    if (nextSelected.length === letterRound.correctLetters.length) {
+      setCelebrating(true);
+      setMessage("Richtig geschrieben! 🎉");
+      playCelebration();
+      window.setTimeout(() => {
+        const next = makeLetterRound(letterRound.word);
+        setLetterRound(next);
+        setSelectedLetters([]);
+        setWrongLetter(null);
+        setCelebrating(false);
+        setMessage(`Wie schreibt man ${next.word}?`);
+        speak(`Wie schreibt man ${next.word}?`);
+      }, 3800);
+    }
+  }
+
+  function goHome() {
+    setPlaying(false);
+    setCelebrating(false);
+    setWrongLetter(null);
+    window.speechSynthesis?.cancel();
   }
 
   useEffect(() => () => {
@@ -178,47 +241,64 @@ export default function Home() {
     <main className="start-screen">
       {!playing ? (
         <div className="tile-grid" aria-label="Startauswahl">
-          <button className="start-tile tile-pink" onClick={startGame} aria-label="Zahlen-Spiel starten">
+          <button className="start-tile tile-pink" onClick={startNumberGame} aria-label="Zahlen-Spiel starten">
             <span className="tile-symbol" aria-hidden="true">✦</span>
             <span className="tile-number">Zahlen</span>
           </button>
-          <div className="start-tile tile-violet" aria-hidden="true"><span className="tile-symbol">♡</span><span className="tile-number">Buchstaben</span></div>
+          <button className="start-tile tile-violet" onClick={startLetterGame} aria-label="Buchstaben-Spiel starten">
+            <span className="tile-symbol" aria-hidden="true">♡</span>
+            <span className="tile-number">Buchstaben</span>
+          </button>
           <div className="start-tile tile-rose" aria-hidden="true"><span className="tile-symbol">✿</span><span className="tile-number">03</span></div>
           <div className="start-tile tile-lilac" aria-hidden="true"><span className="tile-symbol">☾</span><span className="tile-number">04</span></div>
         </div>
-      ) : (
+      ) : gameMode === "numbers" ? (
         <section className="number-game">
           <div className="game-toolbar">
-            <button className="game-back" onClick={() => { setPlaying(false); setCelebrating(false); window.speechSynthesis?.cancel(); }}>← Zurück</button>
+            <button className="game-back" onClick={goHome}>← Zurück</button>
             <span className="game-label">ZAHLEN-SPIEL</span>
           </div>
           <h1 className="game-prompt" aria-live="polite">{message}</h1>
           <p className="game-hint">Tippe auf die richtige Zahl.</p>
           <div className="digit-board" key={roundKey}>
             {layout.map((digit, index) => (
-              <button
-                className="digit-button"
-                key={digit}
+              <button className="digit-button" key={digit}
                 style={{ color: colors[Number(digit)], left: scatter[digit]?.left, top: scatter[digit]?.top, "--drop-delay": `${index * 55}ms`, "--drop-x": `${((index * 47) % 150) - 75}px`, "--drop-rotate": `${((index * 29) % 100) - 50}deg`, "--rest-rotate": `${((index * 7) % 13) - 6}deg` } as CSSProperties}
-                onClick={() => chooseDigit(digit)}
-                disabled={celebrating}
-                aria-label={`Zahl ${digit}`}
-              >
-                {digit}
-              </button>
+                onClick={() => chooseDigit(digit)} disabled={celebrating} aria-label={`Zahl ${digit}`}>{digit}</button>
             ))}
           </div>
-          {celebrating && (
-            <div className="party-overlay" aria-hidden="true">
-              <div className="party-message">SUPER GEMACHT!</div>
-              {Array.from({ length: 190 }, (_, index) => (
-                <i className={index % 3 === 0 ? "confetti-star" : index % 3 === 1 ? "confetti-ribbon" : "confetti-piece"} key={index} style={{ left: `${(index * 37) % 100}%`, animationDelay: `${(index % 30) * 0.055}s`, backgroundColor: colors[index % colors.length], transform: `rotate(${index * 31}deg)` }} />
-              ))}
-              {Array.from({ length: 34 }, (_, index) => (
-                <b className="party-sparkle" key={index} style={{ left: `${(index * 61 + 7) % 100}%`, top: `${(index * 43 + 9) % 92}%`, animationDelay: `${(index % 12) * 0.13}s` }}>✦</b>
-              ))}
-            </div>
-          )}
+          {celebrating && <div className="party-overlay" aria-hidden="true">
+            <div className="party-message">SUPER GEMACHT!</div>
+            {Array.from({ length: 190 }, (_, index) => <i className={index % 3 === 0 ? "confetti-star" : index % 3 === 1 ? "confetti-ribbon" : "confetti-piece"} key={index} style={{ left: `${(index * 37) % 100}%`, animationDelay: `${(index % 30) * 0.055}s`, backgroundColor: colors[index % colors.length], transform: `rotate(${index * 31}deg)` }} />)}
+            {Array.from({ length: 34 }, (_, index) => <b className="party-sparkle" key={index} style={{ left: `${(index * 61 + 7) % 100}%`, top: `${(index * 43 + 9) % 92}%`, animationDelay: `${(index % 12) * 0.13}s` }}>✦</b>)}
+          </div>}
+        </section>
+      ) : (
+        <section className="number-game letter-game">
+          <div className="game-toolbar">
+            <button className="game-back" onClick={goHome}>← Zurück</button>
+            <span className="game-label">BUCHSTABEN-SPIEL</span>
+          </div>
+          <h1 className="game-prompt" aria-live="polite">{message}</h1>
+          <p className="game-hint">Finde die passenden Anfangsbuchstaben auf den Tierbildern.</p>
+          <div className="letter-board">
+            {letterRound.choices.map((filename) => {
+              const letter = imageLetter(filename);
+              const selected = selectedLetters.includes(filename);
+              const wrong = wrongLetter === filename;
+              return <button key={filename} className={`picture-tile${selected ? " selected" : ""}${wrong ? " wrong" : ""}`}
+                onClick={() => chooseLetterPicture(filename)} disabled={selected || celebrating}
+                aria-label={`Bild mit dem Buchstaben ${letter}`}>
+                <img src={`/bilder/${encodeURIComponent(filename)}`} alt={`Tierbild zum Buchstaben ${letter}`} />
+              </button>;
+            })}
+          </div>
+          <p className="letter-progress">{selectedLetters.length} von {letterRound.correctLetters.length} Buchstaben gefunden</p>
+          {celebrating && <div className="party-overlay" aria-hidden="true">
+            <div className="party-message">SUPER GEMACHT!</div>
+            {Array.from({ length: 190 }, (_, index) => <i className={index % 3 === 0 ? "confetti-star" : index % 3 === 1 ? "confetti-ribbon" : "confetti-piece"} key={index} style={{ left: `${(index * 37) % 100}%`, animationDelay: `${(index % 30) * 0.055}s`, backgroundColor: colors[index % colors.length], transform: `rotate(${index * 31}deg)` }} />)}
+            {Array.from({ length: 34 }, (_, index) => <b className="party-sparkle" key={index} style={{ left: `${(index * 61 + 7) % 100}%`, top: `${(index * 43 + 9) % 92}%`, animationDelay: `${(index % 12) * 0.13}s` }}>✦</b>)}
+          </div>}
         </section>
       )}
     </main>
