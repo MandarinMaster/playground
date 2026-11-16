@@ -91,7 +91,18 @@ button.start-tile:hover { transform: translateY(-8px) rotateX(3deg) rotateY(-3de
   cursor: pointer;
   transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
 }
+.picture-image-wrap { position: relative; display: inline-block; max-width: 100%; max-height: 100%; line-height: 0; }
 .picture-tile img { display: block; width: auto !important; height: auto !important; max-width: 100%; max-height: 100%; object-fit: contain !important; object-position: center; border-radius: 14px; }
+.lowercase-cover {
+  position: absolute;
+  left: 53.5%;
+  top: 13%;
+  width: 24%;
+  height: 24%;
+  background: var(--letter-cover, transparent);
+  pointer-events: none;
+  border-radius: 3px;
+}
 .picture-tile:active { transform: scale(.96); }
 .picture-tile.selected {
   border-color: #43d68b;
