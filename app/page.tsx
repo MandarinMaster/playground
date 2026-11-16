@@ -319,13 +319,14 @@ export default function Home() {
     <main className="start-screen">
       {!playing ? (showLibrary ? (
         <section className={`library-screen${showLowercaseInLibrary ? " show-lowercase" : ""}`}>
-          <div className="library-display-control"><button className="library-toggle-lowercase" onClick={() => setShowLowercaseInLibrary((value) => !value)} aria-pressed={showLowercaseInLibrary}>{showLowercaseInLibrary ? "Kleinbuchstaben ausblenden" : "Kleinbuchstaben einblenden"}</button></div>
+          
           <div className="game-toolbar">
             <button className="game-back" onClick={() => setShowLibrary(false)}>← Zurück</button>
             <span className="game-label">BUCHSTABEN-BIBLIOTHEK</span>
           </div>
           <h1 className="game-prompt">Deine Buchstaben</h1>
           <p className="game-hint">Wähle die Tierbilder aus, deren Buchstaben im Spiel vorkommen dürfen.</p>
+          <div className="library-display-control"><button className="library-toggle-lowercase" onClick={() => setShowLowercaseInLibrary((value) => !value)} aria-pressed={showLowercaseInLibrary}>{showLowercaseInLibrary ? "Kleinbuchstaben ausblenden" : "Kleinbuchstaben einblenden"}</button></div>
           <div className="library-grid">
             {letterPictures.map((filename) => {
               const letter = imageLetter(filename);
