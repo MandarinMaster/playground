@@ -289,7 +289,26 @@ export default function Home() {
               return <button key={filename} className={`picture-tile${selected ? " selected" : ""}${wrong ? " wrong" : ""}`}
                 onClick={() => chooseLetterPicture(filename)} disabled={selected || celebrating}
                 aria-label={`Bild mit dem Buchstaben ${letter}`}>
-                <img src={`/bilder/${encodeURIComponent(filename)}`} alt={`Tierbild zum Buchstaben ${letter}`} />
+                <span className="picture-image-wrap">
+                  <img
+                    src={`/bilder/${encodeURIComponent(filename)}`}
+                    alt={`Tierbild zum Buchstaben ${letter}`}
+                    onLoad={(event) => {
+                      const img = event.currentTarget;
+                      try {
+                        const canvas = document.createElement("canvas");
+                        canvas.width = 1;
+                        canvas.height = 1;
+                        const context = canvas.getContext("2d", { willReadFrequently: true });
+                        if (!context) return;
+                        context.drawImage(img, Math.floor(img.naturalWidth * 0.82), Math.floor(img.naturalHeight * 0.23), 1, 1, 0, 0, 1, 1);
+                        const [red, green, blue] = context.getImageData(0, 0, 1, 1).data;
+                        img.parentElement?.style.setProperty("--letter-cover", `rgb(${red}, ${green}, ${blue})`);
+                      } catch {}
+                    }}
+                  />
+                  <span className="lowercase-cover" aria-hidden="true" />
+                </span>
               </button>;
             })}
           </div>
