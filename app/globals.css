@@ -239,3 +239,26 @@ button.start-tile:hover { transform: translateY(-8px) rotateX(3deg) rotateY(-3de
   .library-letter { font-size: 19px; }
   .library-footer { font-size: 13px; }
 }
+
+
+/* Library lowercase visibility control */
+.library-display-control {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+.library-toggle-lowercase {
+  border: 1px solid rgba(255,255,255,.75);
+  border-radius: 99px;
+  padding: 10px 17px;
+  background: rgba(255,255,255,.22);
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(65,30,100,.14);
+}
+.library-screen.show-lowercase .lowercase-cover { display: none; }
+@media(max-width:600px) {
+  .library-display-control { margin-top: 8px; }
+  .library-toggle-lowercase { padding: 9px 13px; font-size: 13px; }
+}
