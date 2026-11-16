@@ -85,11 +85,14 @@ function lowercaseCoverStyle(filename: string): CSSProperties {
   } as CSSProperties;
 }
 
-function makeLetterRound(previousWord?: string) {
-  const word = shuffle(spellingWords.filter((item) => item !== previousWord))[0];
+function makeLetterRound(enabledLetters: string[], previousWord?: string) {
+  const availablePictures = letterPictures.filter((file) => enabledLetters.includes(imageLetter(file)));
+  const words = spellingWords.filter((item) => item !== previousWord && [...new Set(item.toLocaleUpperCase("de-DE").split(""))].every((letter) => enabledLetters.includes(letter)));
+  if (!words.length || availablePictures.length < 2) return null;
+  const word = shuffle(words)[0];
   const correctLetters = [...new Set(word.toLocaleUpperCase("de-DE").split(""))];
-  const correctPictures = correctLetters.map((letter) => letterPictures.find((file) => imageLetter(file) === letter)).filter(Boolean) as string[];
-  const distractors = shuffle(letterPictures.filter((file) => !correctLetters.includes(imageLetter(file)))).slice(0, 6 - correctPictures.length);
+  const correctPictures = correctLetters.map((letter) => availablePictures.find((file) => imageLetter(file) === letter)).filter(Boolean) as string[];
+  const distractors = shuffle(availablePictures.filter((file) => !correctLetters.includes(imageLetter(file)))).slice(0, Math.max(0, 6 - correctPictures.length));
   return { word, correctLetters, choices: shuffle([...correctPictures, ...distractors]) };
 }
 
@@ -164,7 +167,7 @@ function playCelebration() {
 }
 
 export default function Home() {
-  const [playing, setPlaying] = useState(false);
+  const [playing, setPlaying] = useState(false);\n  const [showLibrary, setShowLibrary] = useState(false);\n  const [enabledLetters, setEnabledLetters] = useState<string[]>(letterPictures.map(imageLetter));
   const [gameMode, setGameMode] = useState<"numbers" | "letters">("numbers");
   const [layout, setLayout] = useState(digits);
   const [scatter, setScatter] = useState<Record<string, { left: string; top: string }>>(() => makeScatter());
@@ -172,7 +175,7 @@ export default function Home() {
   const [celebrating, setCelebrating] = useState(false);
   const [message, setMessage] = useState("");
   const [roundKey, setRoundKey] = useState(0);
-  const [letterRound, setLetterRound] = useState(() => makeLetterRound());
+  const [letterRound, setLetterRound] = useState(() => makeLetterRound(letterPictures.map(imageLetter))!);
   const [selectedLetters, setSelectedLetters] = useState<string[]>([]);
   const [wrongLetter, setWrongLetter] = useState<string | null>(null);
 
@@ -288,7 +291,7 @@ export default function Home() {
             <span className="tile-symbol" aria-hidden="true">♡</span>
             <span className="tile-number">Buchstaben</span>
           </button>
-          <div className="start-tile tile-rose" aria-hidden="true"><span className="tile-symbol">✿</span><span className="tile-number">03</span></div>
+          <button className="start-tile tile-rose" onClick={() => setShowLibrary(true)} aria-label="Buchstaben-Bibliothek öffnen"><span className="tile-symbol">▤</span><span className="tile-number">Bibliothek</span></button>
           <div className="start-tile tile-lilac" aria-hidden="true"><span className="tile-symbol">☾</span><span className="tile-number">04</span></div>
         </div>
       ) : gameMode === "numbers" ? (
