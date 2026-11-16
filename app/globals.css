@@ -262,3 +262,8 @@ button.start-tile:hover { transform: translateY(-8px) rotateX(3deg) rotateY(-3de
   .library-display-control { margin-top: 8px; }
   .library-toggle-lowercase { padding: 9px 13px; font-size: 13px; }
 }
+
+
+/* Show all lowercase letters while the library artwork is being refined */
+.lowercase-cover { display: none !important; }
+.library-display-control, .library-toggle-lowercase { display: none !important; }
