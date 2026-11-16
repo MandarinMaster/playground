@@ -169,6 +169,7 @@ function playCelebration() {
 export default function Home() {
   const [playing, setPlaying] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
+  const [showLowercaseInLibrary, setShowLowercaseInLibrary] = useState(false);
   const [enabledLetters, setEnabledLetters] = useState<string[]>(letterPictures.map(imageLetter));
   const [gameMode, setGameMode] = useState<"numbers" | "letters">("numbers");
   const [layout, setLayout] = useState(digits);
@@ -317,7 +318,8 @@ export default function Home() {
   return (
     <main className="start-screen">
       {!playing ? (showLibrary ? (
-        <section className="library-screen">
+        <section className={`library-screen${showLowercaseInLibrary ? " show-lowercase" : ""}`}>
+          <div className="library-display-control"><button className="library-toggle-lowercase" onClick={() => setShowLowercaseInLibrary((value) => !value)} aria-pressed={showLowercaseInLibrary}>{showLowercaseInLibrary ? "Kleinbuchstaben ausblenden" : "Kleinbuchstaben einblenden"}</button></div>
           <div className="game-toolbar">
             <button className="game-back" onClick={() => setShowLibrary(false)}>← Zurück</button>
             <span className="game-label">BUCHSTABEN-BIBLIOTHEK</span>
@@ -330,7 +332,20 @@ export default function Home() {
               const active = enabledLetters.includes(letter);
               return <button key={filename} className={`library-card${active ? " active" : ""}`} onClick={() => toggleLibraryLetter(letter)} aria-pressed={active} aria-label={`${letter} ${active ? "deaktivieren" : "aktivieren"}`}>
                 <span className="library-image-wrap" style={lowercaseCoverStyle(filename)}>
-                  <img src={`/bilder/${encodeURIComponent(filename)}`} alt={filename.replace(/\\.jpg$/i, "")} />
+                  <img src={`/bilder/${encodeURIComponent(filename)}`} alt={filename.replace(/\\.jpg$/i, "")}
+                    onLoad={(event) => {
+                      const img = event.currentTarget;
+                      try {
+                        const canvas = document.createElement("canvas");
+                        canvas.width = 1;
+                        canvas.height = 1;
+                        const context = canvas.getContext("2d", { willReadFrequently: true });
+                        if (!context) return;
+                        context.drawImage(img, Math.floor(img.naturalWidth * 0.94), Math.floor(img.naturalHeight * 0.1), 1, 1, 0, 0, 1, 1);
+                        const [red, green, blue] = context.getImageData(0, 0, 1, 1).data;
+                        img.parentElement?.style.setProperty("--letter-cover", `rgb(${red}, ${green}, ${blue})`);
+                      } catch {}
+                    }} />
                   <span className="lowercase-cover" aria-hidden="true" />
                 </span>
                 <span className="library-letter">{letter}</span>
