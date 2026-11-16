@@ -167,7 +167,9 @@ function playCelebration() {
 }
 
 export default function Home() {
-  const [playing, setPlaying] = useState(false);\n  const [showLibrary, setShowLibrary] = useState(false);\n  const [enabledLetters, setEnabledLetters] = useState<string[]>(letterPictures.map(imageLetter));
+  const [playing, setPlaying] = useState(false);
+  const [showLibrary, setShowLibrary] = useState(false);
+  const [enabledLetters, setEnabledLetters] = useState<string[]>(letterPictures.map(imageLetter));
   const [gameMode, setGameMode] = useState<"numbers" | "letters">("numbers");
   const [layout, setLayout] = useState(digits);
   const [scatter, setScatter] = useState<Record<string, { left: string; top: string }>>(() => makeScatter());
