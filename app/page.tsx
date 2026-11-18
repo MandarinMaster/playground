@@ -388,7 +388,7 @@ export default function Home() {
             </div>
           ) : (
             <>
-              <div className="dice-pair" aria-live="polite" aria-label={"Gewürfelt: " + diceValues.join(", ")}>
+              <div className={`dice-pair dice-count-${diceCount}`} aria-live="polite" aria-label={"Gewürfelt: " + diceValues.join(", ")}>
                 {diceValues.map((value, index) => <div className="die" key={diceRollKey + "-" + index} style={{ animationDelay: (index * 90) + "ms" }} aria-label={value + " Augen"}><span className="die-face">{Array.from({ length: 9 }, (_, pip) => <i className={"die-pip" + ([[], [4], [0, 8], [0, 4, 8], [0, 2, 6, 8], [0, 2, 4, 6, 8], [0, 2, 3, 5, 6, 8]][value].includes(pip) ? " visible" : "")} key={pip} />)}</span></div>)}
               </div>
               <button className="roll-button" onClick={rollDice}>Würfeln</button>
