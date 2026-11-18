@@ -410,7 +410,7 @@ body:has(.dice-game) .start-screen:has(.dice-game) {
 }
 .dice-pair.dice-count-1,
 .dice-pair.dice-count-2 {
-  margin-top:clamp(100px,16vh,155px);
+  margin-top:clamp(170px,25vh,260px);
   margin-bottom:24px;
 }
 @media(max-width:600px) {
@@ -421,7 +421,7 @@ body:has(.dice-game) .start-screen:has(.dice-game) {
   .dice-pair.dice-count-1 .die,
   .dice-pair.dice-count-2 .die { flex-basis:clamp(145px,44vw,220px); }
   .dice-pair.dice-count-1,
-  .dice-pair.dice-count-2 { margin-top:clamp(78px,13vh,118px); margin-bottom:18px; }
+  .dice-pair.dice-count-2 { margin-top:clamp(135px,22vh,205px); margin-bottom:18px; }
   .dice-pair .die-pip { width:clamp(18px,6vw,28px); }
 }
 
