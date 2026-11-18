@@ -170,6 +170,7 @@ export default function Home() {
   const [playing, setPlaying] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
   const [showDice, setShowDice] = useState(false);
+  const [showDiceSettings, setShowDiceSettings] = useState(false);
   const [diceCount, setDiceCount] = useState(2);
   const [diceValues, setDiceValues] = useState<number[]>([1, 1]);
   const [diceRollKey, setDiceRollKey] = useState(0);
@@ -371,21 +372,30 @@ export default function Home() {
       ) : showDice ? (
         <section className="dice-game">
           <div className="game-toolbar">
-            <button className="game-back" onClick={() => setShowDice(false)}>← Zurück</button>
-            <span className="game-label">WÜRFELSPIEL</span>
+            <button className="game-back" onClick={() => { setShowDice(false); setShowDiceSettings(false); }}>← Zurück</button>
+            <button className="dice-settings-button" onClick={() => setShowDiceSettings((shown) => !shown)}>{showDiceSettings ? "Spiel" : "Einstellungen"}</button>
           </div>
-          <h1 className="game-prompt">{diceCount === 1 ? "Ein Würfel" : `${diceCount} Würfel`}</h1>
-          <div className="dice-count-control" role="group" aria-label="Anzahl der Würfel">
-            <span>Würfelanzahl</span>
-            <div className="dice-count-options">
-              {[1, 2, 3, 4, 5, 6].map((count) => <button key={count} type="button" className={`dice-count-option${diceCount === count ? " active" : ""}`} aria-pressed={diceCount === count} onClick={() => { setDiceCount(count); setDiceValues(Array.from({ length: count }, () => 1)); }}>{count}</button>)}
+          {showDiceSettings ? (
+            <div className="dice-settings-panel">
+              <h1 className="game-prompt">Einstellungen</h1>
+              <p className="game-hint">Wie viele Würfel möchtest du verwenden?</p>
+              <div className="dice-count-control" role="group" aria-label="Anzahl der Würfel">
+                <div className="dice-count-options">
+                  {[1, 2, 3, 4, 5, 6].map((count) => <button key={count} type="button" className={`dice-count-option${diceCount === count ? " active" : ""}`} aria-pressed={diceCount === count} onClick={() => { setDiceCount(count); setDiceValues(Array.from({ length: count }, () => 1)); }}>{count}</button>)}
+                </div>
+              </div>
+              <button className="dice-settings-done" onClick={() => setShowDiceSettings(false)}>Fertig</button>
             </div>
-          </div>
-          <p className="game-hint">Was wird gewürfelt?</p>
-          <div className="dice-pair" aria-live="polite" aria-label={"Gewürfelt: " + diceValues.join(", ")}>
-            {diceValues.map((value, index) => <div className="die" key={diceRollKey + "-" + index} style={{ animationDelay: (index * 90) + "ms" }} aria-label={value + " Augen"}><span className="die-face">{Array.from({ length: 9 }, (_, pip) => <i className={"die-pip" + ([[], [4], [0, 8], [0, 4, 8], [0, 2, 6, 8], [0, 2, 4, 6, 8], [0, 2, 3, 5, 6, 8]][value].includes(pip) ? " visible" : "")} key={pip} />)}</span></div>)}
-          </div>
-          <button className="roll-button" onClick={rollDice}>Würfeln</button>
+          ) : (
+            <>
+              <h1 className="game-prompt">{diceCount === 1 ? "Ein Würfel" : `${diceCount} Würfel`}</h1>
+              <p className="game-hint">Was wird gewürfelt?</p>
+              <div className="dice-pair" aria-live="polite" aria-label={"Gewürfelt: " + diceValues.join(", ")}>
+                {diceValues.map((value, index) => <div className="die" key={diceRollKey + "-" + index} style={{ animationDelay: (index * 90) + "ms" }} aria-label={value + " Augen"}><span className="die-face">{Array.from({ length: 9 }, (_, pip) => <i className={"die-pip" + ([[], [4], [0, 8], [0, 4, 8], [0, 2, 6, 8], [0, 2, 4, 6, 8], [0, 2, 3, 5, 6, 8]][value].includes(pip) ? " visible" : "")} key={pip} />)}</span></div>)}
+              </div>
+              <button className="roll-button" onClick={rollDice}>Würfeln</button>
+            </>
+          )}
         </section>
       ) : (
         <div className="tile-grid" aria-label="Startauswahl">
