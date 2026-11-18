@@ -298,3 +298,43 @@ button.start-tile:hover { transform: translateY(-8px) rotateX(3deg) rotateY(-3de
 .roll-button:active { transform:translateY(5px); box-shadow:0 2px 0 rgba(125,48,125,.28); }
 @keyframes dice-tumble { 0% { opacity:.3; transform:translateY(-35px) rotate(-35deg) scale(.7); } 65% { opacity:1; transform:translateY(8px) rotate(12deg) scale(1.08); } 100% { transform:translateY(0) rotate(0) scale(1); } }
 @media(max-width:600px) { .dice-game { min-height:calc(100vh - 48px); } .dice-pair { gap:16px; margin:45px 0; } .die { width:clamp(128px,42vw,200px); border-radius:22px; } .die-pip { width:clamp(18px,7vw,30px); } .roll-button { width:clamp(145px,42vw,185px); border-radius:25px; font-size:clamp(24px,6vw,30px); } }
+
+
+/* Midnight-blue theme for the dice screen */
+.start-screen:has(.dice-game) {
+  background:
+    radial-gradient(ellipse at 50% 28%, rgba(24,83,137,.48), transparent 54%),
+    radial-gradient(ellipse at 12% 90%, rgba(15,48,91,.5), transparent 45%),
+    linear-gradient(145deg,#030711 0%,#07152b 52%,#020611 100%);
+}
+.dice-game .game-back {
+  border-color:rgba(125,207,255,.55);
+  background:linear-gradient(145deg,rgba(48,116,166,.38),rgba(7,27,52,.72));
+  color:#d9f3ff;
+  box-shadow:inset 0 1px 3px rgba(255,255,255,.16),0 5px 14px rgba(0,0,0,.28);
+}
+.dice-game .game-label { color:#83cfff; }
+.dice-game .game-prompt { color:#e5f6ff; text-shadow:0 0 12px rgba(65,170,255,.35),0 4px 18px rgba(0,0,0,.65); }
+.dice-game .game-hint { color:#a9d9f5; }
+.dice-game .die {
+  border-color:rgba(133,211,255,.9);
+  background:linear-gradient(135deg,rgba(99,178,229,.3) 0%,rgba(20,57,94,.62) 34%,rgba(5,20,42,.82) 68%,rgba(82,156,207,.3) 100%);
+  color:#9bdcff;
+  box-shadow:0 13px 0 rgba(0,0,0,.48),0 24px 34px rgba(0,0,0,.55),0 0 24px rgba(48,151,225,.18),inset 0 3px 8px rgba(210,243,255,.48),inset 0 -10px 18px rgba(0,8,22,.72),inset 3px 0 8px rgba(151,220,255,.24);
+}
+.dice-game .die::before { border-color:rgba(173,228,255,.48); background:linear-gradient(145deg,rgba(193,235,255,.24),transparent 45%); }
+.dice-game .die::after { background:rgba(153,220,255,.58); }
+.dice-game .die-pip {
+  background:radial-gradient(circle at 32% 27%,#e2f8ff 0%,#70caff 42%,#1674b7 100%);
+  box-shadow:inset 1px 2px 3px rgba(255,255,255,.78),0 2px 5px rgba(0,0,0,.48),0 0 9px rgba(91,194,255,.42);
+}
+.dice-game .roll-button {
+  border-color:#a9e4ff;
+  background:linear-gradient(145deg,#247eb6 0%,#10436f 52%,#071c38 100%);
+  color:#effaff;
+  text-shadow:0 2px 8px rgba(0,0,0,.48);
+  box-shadow:0 7px 0 rgba(0,0,0,.5),0 13px 22px rgba(0,0,0,.42),0 0 22px rgba(64,171,235,.22),inset 0 2px 5px rgba(220,246,255,.42);
+}
+.dice-game .roll-button:active {
+  box-shadow:0 2px 0 rgba(0,0,0,.5),0 0 18px rgba(64,171,235,.32),inset 0 2px 5px rgba(220,246,255,.42);
+}
