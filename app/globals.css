@@ -338,3 +338,19 @@ button.start-tile:hover { transform: translateY(-8px) rotateX(3deg) rotateY(-3de
 .dice-game .roll-button:active {
   box-shadow:0 2px 0 rgba(0,0,0,.5),0 0 18px rgba(64,171,235,.32),inset 0 2px 5px rgba(220,246,255,.42);
 }
+
+
+/* Ensure the entire page canvas follows the dice game's midnight palette. */
+html:has(.dice-game),
+body:has(.dice-game) {
+  background: #020611 !important;
+  background-color: #020611 !important;
+}
+body:has(.dice-game) .start-screen:has(.dice-game) {
+  min-height: 100vh;
+  background-color: #020611 !important;
+  background-image:
+    radial-gradient(ellipse at 50% 28%, rgba(24,83,137,.48), transparent 54%),
+    radial-gradient(ellipse at 12% 90%, rgba(15,48,91,.5), transparent 45%),
+    linear-gradient(145deg,#030711 0%,#07152b 52%,#020611 100%) !important;
+}
