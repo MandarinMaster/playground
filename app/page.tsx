@@ -388,8 +388,6 @@ export default function Home() {
             </div>
           ) : (
             <>
-              <h1 className="game-prompt">{diceCount === 1 ? "Ein Würfel" : `${diceCount} Würfel`}</h1>
-              <p className="game-hint">Was wird gewürfelt?</p>
               <div className="dice-pair" aria-live="polite" aria-label={"Gewürfelt: " + diceValues.join(", ")}>
                 {diceValues.map((value, index) => <div className="die" key={diceRollKey + "-" + index} style={{ animationDelay: (index * 90) + "ms" }} aria-label={value + " Augen"}><span className="die-face">{Array.from({ length: 9 }, (_, pip) => <i className={"die-pip" + ([[], [4], [0, 8], [0, 4, 8], [0, 2, 6, 8], [0, 2, 4, 6, 8], [0, 2, 3, 5, 6, 8]][value].includes(pip) ? " visible" : "")} key={pip} />)}</span></div>)}
               </div>
