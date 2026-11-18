@@ -169,6 +169,9 @@ function playCelebration() {
 export default function Home() {
   const [playing, setPlaying] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
+  const [showDice, setShowDice] = useState(false);
+  const [diceValues, setDiceValues] = useState<[number, number]>([1, 1]);
+  const [diceRollKey, setDiceRollKey] = useState(0);
   const [showLowercaseInLibrary, setShowLowercaseInLibrary] = useState(false);
   const [enabledLetters, setEnabledLetters] = useState<string[]>(letterPictures.map(imageLetter));
   const [gameMode, setGameMode] = useState<"numbers" | "letters">("numbers");
@@ -181,6 +184,11 @@ export default function Home() {
   const [letterRound, setLetterRound] = useState(() => makeLetterRound(letterPictures.map(imageLetter))!);
   const [selectedLetters, setSelectedLetters] = useState<string[]>([]);
   const [wrongLetter, setWrongLetter] = useState<string | null>(null);
+
+  function rollDice() {
+    setDiceValues([1 + Math.floor(Math.random() * 6), 1 + Math.floor(Math.random() * 6)]);
+    setDiceRollKey((key) => key + 1);
+  }
 
   function speak(text: string) {
     if (!( "speechSynthesis" in window)) return;
@@ -359,6 +367,19 @@ export default function Home() {
             <button className="library-done" onClick={() => setShowLibrary(false)}>Fertig</button>
           </div>
         </section>
+      ) : showDice ? (
+        <section className="dice-game">
+          <div className="game-toolbar">
+            <button className="game-back" onClick={() => setShowDice(false)}>← Zurück</button>
+            <span className="game-label">WÜRFELSPIEL</span>
+          </div>
+          <h1 className="game-prompt">Zwei Würfel</h1>
+          <p className="game-hint">Was wird gewürfelt?</p>
+          <div className="dice-pair" aria-live="polite" aria-label={"Gewürfelt: " + diceValues[0] + " und " + diceValues[1]}>
+            {diceValues.map((value, index) => <div className="die" key={diceRollKey + "-" + index} style={{ animationDelay: (index * 90) + "ms" }}>{["","⚀","⚁","⚂","⚃","⚄","⚅"][value]}</div>)}
+          </div>
+          <button className="roll-button" onClick={rollDice}>Würfeln</button>
+        </section>
       ) : (
         <div className="tile-grid" aria-label="Startauswahl">
           <button className="start-tile tile-pink" onClick={startNumberGame} aria-label="Zahlen-Spiel starten">
@@ -370,7 +391,7 @@ export default function Home() {
             <span className="tile-number">Buchstaben</span>
           </button>
           <button className="start-tile tile-rose" onClick={() => setShowLibrary(true)} aria-label="Buchstaben-Bibliothek öffnen"><span className="tile-symbol">▤</span><span className="tile-number">Bibliothek</span></button>
-          <div className="start-tile tile-lilac" aria-hidden="true"><span className="tile-symbol">☾</span><span className="tile-number">04</span></div>
+          <button className="start-tile tile-lilac" onClick={() => { setDiceValues([1, 1]); setShowDice(true); }} aria-label="Würfel öffnen"><span className="tile-symbol">⚄</span><span className="tile-number">Würfeln</span></button>
         </div>
       )) : gameMode === "numbers" ? (
         <section className="number-game">
