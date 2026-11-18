@@ -170,7 +170,8 @@ export default function Home() {
   const [playing, setPlaying] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
   const [showDice, setShowDice] = useState(false);
-  const [diceValues, setDiceValues] = useState<[number, number]>([1, 1]);
+  const [diceCount, setDiceCount] = useState(2);
+  const [diceValues, setDiceValues] = useState<number[]>([1, 1]);
   const [diceRollKey, setDiceRollKey] = useState(0);
   const [showLowercaseInLibrary, setShowLowercaseInLibrary] = useState(false);
   const [enabledLetters, setEnabledLetters] = useState<string[]>(letterPictures.map(imageLetter));
@@ -186,7 +187,7 @@ export default function Home() {
   const [wrongLetter, setWrongLetter] = useState<string | null>(null);
 
   function rollDice() {
-    setDiceValues([1 + Math.floor(Math.random() * 6), 1 + Math.floor(Math.random() * 6)]);
+    setDiceValues(Array.from({ length: diceCount }, () => 1 + Math.floor(Math.random() * 6)));
     setDiceRollKey((key) => key + 1);
   }
 
@@ -373,9 +374,15 @@ export default function Home() {
             <button className="game-back" onClick={() => setShowDice(false)}>← Zurück</button>
             <span className="game-label">WÜRFELSPIEL</span>
           </div>
-          <h1 className="game-prompt">Zwei Würfel</h1>
+          <h1 className="game-prompt">{diceCount === 1 ? "Ein Würfel" : `${diceCount} Würfel`}</h1>
+          <div className="dice-count-control" role="group" aria-label="Anzahl der Würfel">
+            <span>Würfelanzahl</span>
+            <div className="dice-count-options">
+              {[1, 2, 3, 4, 5, 6].map((count) => <button key={count} type="button" className={`dice-count-option${diceCount === count ? " active" : ""}`} aria-pressed={diceCount === count} onClick={() => { setDiceCount(count); setDiceValues(Array.from({ length: count }, () => 1)); }}>{count}</button>)}
+            </div>
+          </div>
           <p className="game-hint">Was wird gewürfelt?</p>
-          <div className="dice-pair" aria-live="polite" aria-label={"Gewürfelt: " + diceValues[0] + " und " + diceValues[1]}>
+          <div className="dice-pair" aria-live="polite" aria-label={"Gewürfelt: " + diceValues.join(", ")}>
             {diceValues.map((value, index) => <div className="die" key={diceRollKey + "-" + index} style={{ animationDelay: (index * 90) + "ms" }} aria-label={value + " Augen"}><span className="die-face">{Array.from({ length: 9 }, (_, pip) => <i className={"die-pip" + ([[], [4], [0, 8], [0, 4, 8], [0, 2, 6, 8], [0, 2, 4, 6, 8], [0, 2, 3, 5, 6, 8]][value].includes(pip) ? " visible" : "")} key={pip} />)}</span></div>)}
           </div>
           <button className="roll-button" onClick={rollDice}>Würfeln</button>
