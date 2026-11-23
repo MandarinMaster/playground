@@ -355,7 +355,7 @@ export default function Home() {
           {availableVoices.length ? (
             <>
               <select className="voice-select" aria-label="Deutsche Sprechstimme" value={selectedVoiceURI} onChange={(event) => setSelectedVoiceURI(event.target.value)}>
-                {availableVoices.map((voice) => <option key={voice.voiceURI} value={voice.voiceURI}>{voice.name} ({voice.lang})</option>)}
+                {availableVoices.map((voice) => <option key={voice.voiceURI} value={voice.voiceURI}>{voice.name} ({voice.lang} · {voice.localService ? "lokal" : "Netzwerk"}{voice.default ? " · Standard" : ""} · {voice.voiceURI.slice(-18)})</option>)}
               </select>
               <button className="voice-preview-button" onClick={() => speak("Hallo! Ich freue mich, mit dir zu lernen. Wie schreibt man Katze?")}>Stimme anhören</button>
             </>
