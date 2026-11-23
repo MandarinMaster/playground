@@ -169,6 +169,9 @@ function playCelebration() {
 export default function Home() {
   const [playing, setPlaying] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
+  const [showHomeSettings, setShowHomeSettings] = useState(false);
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [selectedVoiceURI, setSelectedVoiceURI] = useState("");
   const [showDice, setShowDice] = useState(false);
   const [showDiceSettings, setShowDiceSettings] = useState(false);
   const [diceCount, setDiceCount] = useState(2);
