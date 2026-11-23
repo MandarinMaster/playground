@@ -169,6 +169,7 @@ export default function Home() {
   const [showLibrary, setShowLibrary] = useState(false);
   const [showHomeSettings, setShowHomeSettings] = useState(false);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [allAvailableVoices, setAllAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoiceURI, setSelectedVoiceURI] = useState("");
   const [showDice, setShowDice] = useState(false);
   const [showDiceSettings, setShowDiceSettings] = useState(false);
@@ -286,7 +287,9 @@ export default function Home() {
   useEffect(() => {
     if (!("speechSynthesis" in window)) return;
     const refreshVoices = () => {
-      const germanVoices = window.speechSynthesis.getVoices().filter((voice) => voice.lang.toLowerCase().startsWith("de")).sort((a, b) => a.name.localeCompare(b.name, "de"));
+      const allVoices = window.speechSynthesis.getVoices();
+      setAllAvailableVoices(allVoices);
+      const germanVoices = allVoices.filter((voice) => voice.lang.toLowerCase().startsWith("de")).sort((a, b) => a.name.localeCompare(b.name, "de"));
       setAvailableVoices(germanVoices);
       const savedVoice = window.localStorage.getItem("playground-speech-voice");
       if (savedVoice && germanVoices.some((voice) => voice.voiceURI === savedVoice)) setSelectedVoiceURI(savedVoice);
@@ -297,7 +300,17 @@ export default function Home() {
     };
     refreshVoices();
     window.speechSynthesis.addEventListener("voiceschanged", refreshVoices);
-    return () => window.speechSynthesis.removeEventListener("voiceschanged", refreshVoices);
+    window.addEventListener("focus", refreshVoices);
+    document.addEventListener("visibilitychange", refreshVoices);
+    const retryOne = window.setTimeout(refreshVoices, 500);
+    const retryTwo = window.setTimeout(refreshVoices, 1500);
+    return () => {
+      window.speechSynthesis.removeEventListener("voiceschanged", refreshVoices);
+      window.removeEventListener("focus", refreshVoices);
+      document.removeEventListener("visibilitychange", refreshVoices);
+      window.clearTimeout(retryOne);
+      window.clearTimeout(retryTwo);
+    };
   }, [selectedVoiceURI]);
 
   useEffect(() => {
@@ -347,6 +360,21 @@ export default function Home() {
               <button className="voice-preview-button" onClick={() => speak("Hallo! Ich freue mich, mit dir zu lernen. Wie schreibt man Katze?")}>Stimme anhören</button>
             </>
           ) : <p className="voice-unavailable">Es wurden noch keine deutschen Gerätestimmen gefunden. Bitte prüfe die Sprach- und Stimmeinstellungen deines Geräts.</p>}
+          <section className="voice-diagnostics">
+            <h2>Erkannte Gerätestimmen</h2>
+            <p>Insgesamt: {allAvailableVoices.length} · Deutsch: {availableVoices.length}</p>
+            <button className="voice-preview-button" onClick={() => {
+              const voices = window.speechSynthesis.getVoices();
+              setAllAvailableVoices(voices);
+              setAvailableVoices(voices.filter((voice) => voice.lang.toLowerCase().startsWith("de")).sort((a, b) => a.name.localeCompare(b.name, "de")));
+            }}>Stimmen neu laden</button>
+            {allAvailableVoices.length ? <ul className="voice-diagnostics-list">
+              {allAvailableVoices.map((voice) => <li key={voice.voiceURI}>
+                <strong>{voice.name}</strong> — {voice.lang}
+                <small>{voice.voiceURI} · {voice.localService ? "lokal" : "Netzwerk"}{voice.default ? " · Standardsstimme" : ""}</small>
+              </li>)}
+            </ul> : <p>Noch keine Stimmen vom Browser gemeldet.</p>}
+          </section>
           <p className="voice-note">Die verfügbaren Stimmen hängen von deinem Gerät und Browser ab. Deine Auswahl wird auf diesem Gerät gespeichert.</p>
         </section>
       ) : showLibrary ? (
