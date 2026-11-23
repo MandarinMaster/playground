@@ -200,6 +200,8 @@ export default function Home() {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "de-DE";
+    const selectedVoice = window.speechSynthesis.getVoices().find((voice) => voice.voiceURI === selectedVoiceURI);
+    if (selectedVoice) utterance.voice = selectedVoice;
     utterance.rate = 0.88;
     utterance.pitch = 1.12;
     window.speechSynthesis.speak(utterance);
@@ -299,6 +301,27 @@ export default function Home() {
     setWrongLetter(null);
     window.speechSynthesis?.cancel();
   }
+
+  useEffect(() => {
+    if (!("speechSynthesis" in window)) return;
+    const refreshVoices = () => {
+      const germanVoices = window.speechSynthesis.getVoices().filter((voice) => voice.lang.toLowerCase().startsWith("de")).sort((a, b) => a.name.localeCompare(b.name, "de"));
+      setAvailableVoices(germanVoices);
+      const savedVoice = window.localStorage.getItem("playground-speech-voice");
+      if (savedVoice && germanVoices.some((voice) => voice.voiceURI === savedVoice)) setSelectedVoiceURI(savedVoice);
+      else if (!selectedVoiceURI && germanVoices.length) {
+        const preferred = germanVoices.find((voice) => /natural|online|google|katja|anna/i.test(voice.name)) ?? germanVoices[0];
+        setSelectedVoiceURI(preferred.voiceURI);
+      }
+    };
+    refreshVoices();
+    window.speechSynthesis.addEventListener("voiceschanged", refreshVoices);
+    return () => window.speechSynthesis.removeEventListener("voiceschanged", refreshVoices);
+  }, [selectedVoiceURI]);
+
+  useEffect(() => {
+    if (selectedVoiceURI) { try { window.localStorage.setItem("playground-speech-voice", selectedVoiceURI); } catch {} }
+  }, [selectedVoiceURI]);
 
   useEffect(() => {
     try {
