@@ -542,3 +542,26 @@ body:has(.dice-game) .start-screen:has(.dice-game) {
   width:100%;
   aspect-ratio:3 / 4;
 }
+
+
+.voice-diagnostics {
+  width:min(620px,92vw);
+  margin:26px auto 0;
+  padding:18px;
+  border:1px solid rgba(255,255,255,.35);
+  border-radius:18px;
+  background:rgba(65,35,100,.16);
+  color:white;
+  text-align:left;
+}
+.voice-diagnostics h2 { margin:0 0 8px; font-size:19px; }
+.voice-diagnostics p { margin:6px 0 12px; font-size:14px; }
+.voice-diagnostics-list {
+  max-height:260px;
+  overflow:auto;
+  margin:14px 0 0;
+  padding-left:22px;
+  font-size:14px;
+}
+.voice-diagnostics-list li { margin:0 0 12px; overflow-wrap:anywhere; }
+.voice-diagnostics-list small { display:block; margin-top:3px; opacity:.8; font-size:11px; }
