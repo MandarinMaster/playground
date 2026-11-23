@@ -87,13 +87,11 @@ function lowercaseCoverStyle(filename: string): CSSProperties {
 
 function makeLetterRound(enabledLetters: string[], previousWord?: string) {
   const availablePictures = letterPictures.filter((file) => enabledLetters.includes(imageLetter(file)));
-  const words = spellingWords.filter((item) => item !== previousWord && [...new Set(item.toLocaleUpperCase("de-DE").split(""))].every((letter) => enabledLetters.includes(letter)));
-  if (!words.length || availablePictures.length < 2) return null;
-  const word = shuffle(words)[0];
-  const correctLetters = [...new Set(word.toLocaleUpperCase("de-DE").split(""))];
-  const correctPictures = correctLetters.map((letter) => availablePictures.find((file) => imageLetter(file) === letter)).filter(Boolean) as string[];
-  const distractors = shuffle(availablePictures.filter((file) => !correctLetters.includes(imageLetter(file)))).slice(0, Math.max(0, 6 - correctPictures.length));
-  return { word, correctLetters, choices: shuffle([...correctPictures, ...distractors]) };
+  if (!availablePictures.length) return null;
+  const choices = shuffle(availablePictures.filter((file) => imageLetter(file) !== previousWord));
+  const filename = choices[0] ?? shuffle(availablePictures)[0];
+  const letter = imageLetter(filename);
+  return { word: letter, correctLetters: [letter], choices: [filename] };
 }
 
 let sharedAudioContext: AudioContext | null = null;
@@ -238,7 +236,7 @@ export default function Home() {
     setCelebrating(false);
     setGameMode("letters");
     setPlaying(true);
-    const phrase = `Wie schreibt man ${next.word}?`;
+    const phrase = `Das ist der Buchstabe ${next.word}.`;
     setMessage(phrase);
     window.setTimeout(() => speak(phrase), 180);
   }
@@ -264,35 +262,18 @@ export default function Home() {
   }
 
   function chooseLetterPicture(filename: string) {
-    if (celebrating || selectedLetters.includes(filename)) return;
-    const letter = imageLetter(filename);
-    if (!letterRound.correctLetters.includes(letter)) {
-      setWrongLetter(filename);
-      playTone([190, 145], 0.16, "triangle");
-      window.setTimeout(() => setWrongLetter((current) => current === filename ? null : current), 850);
+    if (celebrating) return;
+    const next = makeLetterRound(enabledLetters, imageLetter(filename)) ?? makeLetterRound(enabledLetters);
+    if (!next) {
+      setPlaying(false);
+      setShowLibrary(true);
       return;
     }
-    const nextSelected = [...selectedLetters, filename];
-    setSelectedLetters(nextSelected);
-    if (nextSelected.length === letterRound.correctLetters.length) {
-      setCelebrating(true);
-      setMessage("Richtig geschrieben! 🎉");
-      playCelebration();
-      window.setTimeout(() => {
-        const next = makeLetterRound(enabledLetters, letterRound.word) ?? makeLetterRound(enabledLetters);
-        if (!next) {
-          setPlaying(false);
-          setShowLibrary(true);
-          return;
-        }
-        setLetterRound(next);
-        setSelectedLetters([]);
-        setWrongLetter(null);
-        setCelebrating(false);
-        setMessage(`Wie schreibt man ${next.word}?`);
-        speak(`Wie schreibt man ${next.word}?`);
-      }, 3800);
-    }
+    setLetterRound(next);
+    setSelectedLetters([]);
+    setWrongLetter(null);
+    setMessage(`Das ist der Buchstabe ${next.word}.`);
+    speak(`Das ist der Buchstabe ${next.word}.`);
   }
 
   function goHome() {
@@ -480,7 +461,7 @@ export default function Home() {
             <span className="game-label">BUCHSTABEN-SPIEL</span>
           </div>
           <h1 className="game-prompt" aria-live="polite">{message}</h1>
-          <p className="game-hint">Finde die passenden Anfangsbuchstaben auf den Tierbildern.</p>
+          <p className="game-hint">Schau dir den Buchstaben an. Tippe darauf für den nächsten.</p>
           <div className="letter-board">
             {letterRound.choices.map((filename) => {
               const letter = imageLetter(filename);
