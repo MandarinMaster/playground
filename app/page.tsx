@@ -437,7 +437,9 @@ export default function Home() {
           )}
         </section>
       ) : (
-        <div className="tile-grid" aria-label="Startauswahl">
+        <div className="home-screen">
+          <button className="home-settings-button" onClick={() => setShowHomeSettings(true)}>Einstellungen</button>
+          <div className="tile-grid" aria-label="Startauswahl">
           <button className="start-tile tile-pink" onClick={startNumberGame} aria-label="Zahlen-Spiel starten">
             <span className="tile-symbol" aria-hidden="true">✦</span>
             <span className="tile-number">Zahlen</span>
@@ -448,6 +450,7 @@ export default function Home() {
           </button>
           <button className="start-tile tile-rose" onClick={() => setShowLibrary(true)} aria-label="Buchstaben-Bibliothek öffnen"><span className="tile-symbol">▤</span><span className="tile-number">Bibliothek</span></button>
           <button className="start-tile tile-lilac" onClick={() => { setDiceValues([1, 1]); setShowDice(true); }} aria-label="Würfel öffnen"><span className="tile-symbol">⚄</span><span className="tile-number">Würfeln</span></button>
+          </div>
         </div>
       )) : gameMode === "numbers" ? (
         <section className="number-game">
