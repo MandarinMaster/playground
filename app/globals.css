@@ -458,3 +458,74 @@ body:has(.dice-game) .start-screen:has(.dice-game) {
   .dice-settings-panel .dice-count-options { gap:8px; }
   .dice-settings-panel .dice-count-option { width:43px; height:43px; }
 }
+
+
+/* Start screen settings and device voice selection */
+.home-screen {
+  position:relative;
+  width:min(760px,100%);
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  padding-top:58px;
+}
+.home-settings-button {
+  position:absolute;
+  top:0;
+  right:0;
+  border:1px solid rgba(255,255,255,.78);
+  border-radius:99px;
+  padding:10px 17px;
+  background:rgba(255,255,255,.24);
+  color:white;
+  font-size:13px;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:0 4px 12px rgba(65,30,100,.14);
+}
+.home-settings-screen {
+  width:min(760px,100%);
+  min-height:min(620px,calc(100vh - 50px));
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.home-settings-screen .game-prompt { margin-top:clamp(35px,8vh,70px); }
+.voice-select {
+  width:min(440px,100%);
+  margin:22px 0 14px;
+  padding:15px 18px;
+  border:2px solid rgba(255,255,255,.85);
+  border-radius:16px;
+  background:rgba(255,255,255,.94);
+  color:#563477;
+  font:800 16px Nunito,sans-serif;
+}
+.voice-select option { color:#35204b; }
+.voice-preview-button {
+  min-width:190px;
+  padding:13px 22px;
+  border:2px solid white;
+  border-radius:99px;
+  background:linear-gradient(145deg,#ffb8e2,#d85eae);
+  color:white;
+  font-size:17px;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:0 6px 0 rgba(125,48,125,.24),0 10px 20px rgba(73,34,113,.18);
+}
+.voice-note,.voice-unavailable {
+  max-width:520px;
+  margin:22px auto 0;
+  color:rgba(255,255,255,.88);
+  text-align:center;
+  font-size:14px;
+  font-weight:700;
+  line-height:1.5;
+}
+@media(max-width:600px) {
+  .home-screen { padding-top:54px; }
+  .home-settings-button { padding:9px 14px; font-size:12px; }
+  .home-settings-screen { min-height:calc(100vh - 48px); }
+  .voice-select { font-size:14px; }
+}
