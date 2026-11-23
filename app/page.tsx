@@ -353,7 +353,22 @@ export default function Home() {
 
   return (
     <main className="start-screen">
-      {!playing ? (showLibrary ? (
+      {!playing ? (showHomeSettings && !showLibrary && !showDice ? (
+        <section className="home-settings-screen">
+          <div className="game-toolbar"><button className="game-back" onClick={() => setShowHomeSettings(false)}>← Zurück</button><span className="game-label">APP-EINSTELLUNGEN</span></div>
+          <h1 className="game-prompt">Sprechstimme</h1>
+          <p className="game-hint">Wähle eine deutsche Stimme und höre sie dir an.</p>
+          {availableVoices.length ? (
+            <>
+              <select className="voice-select" aria-label="Deutsche Sprechstimme" value={selectedVoiceURI} onChange={(event) => setSelectedVoiceURI(event.target.value)}>
+                {availableVoices.map((voice) => <option key={voice.voiceURI} value={voice.voiceURI}>{voice.name} ({voice.lang})</option>)}
+              </select>
+              <button className="voice-preview-button" onClick={() => speak("Hallo! Ich freue mich, mit dir zu lernen. Wie schreibt man Katze?")}>Stimme anhören</button>
+            </>
+          ) : <p className="voice-unavailable">Es wurden noch keine deutschen Gerätestimmen gefunden. Bitte prüfe die Sprach- und Stimmeinstellungen deines Geräts.</p>}
+          <p className="voice-note">Die verfügbaren Stimmen hängen von deinem Gerät und Browser ab. Deine Auswahl wird auf diesem Gerät gespeichert.</p>
+        </section>
+      ) : showLibrary ? (
         <section className={`library-screen${showLowercaseInLibrary ? " show-lowercase" : ""}`}>
           
           <div className="game-toolbar">
