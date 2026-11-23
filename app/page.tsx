@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 const digits = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 const prompts = [
@@ -169,6 +169,7 @@ export default function Home() {
   const [showLibrary, setShowLibrary] = useState(false);
   const [showClock, setShowClock] = useState(false);
   const [clockMinutes, setClockMinutes] = useState(180);
+  const clockDragRef = useRef<{ angle: number; minutes: number } | null>(null);
   const [showHomeSettings, setShowHomeSettings] = useState(false);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [allAvailableVoices, setAllAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
@@ -413,7 +414,7 @@ export default function Home() {
         <section className="clock-game">
           <div className="game-toolbar"><button className="game-back" onClick={() => setShowClock(false)}>← Zurück</button><span className="game-label">UHRZEIT-SPIEL</span></div>
           <h1 className="game-prompt">Wie spät ist es?</h1><p className="game-hint">Ziehe den Minutenzeiger auf die gewünschte Uhrzeit.</p>
-          <svg className="analog-clock" viewBox="0 0 400 400" role="slider" aria-label="Analoguhr: Minutenzeiger verschieben" onPointerDown={(event) => { const r=event.currentTarget.getBoundingClientRect(); const x=(event.clientX-r.left)/r.width*400-200; const y=(event.clientY-r.top)/r.height*400-200; let a=Math.atan2(x,-y)*180/Math.PI; if(a<0)a+=360; setClockMinutes(Math.floor(clockMinutes/60)*60+(Math.round(a/6)%60)); event.currentTarget.setPointerCapture(event.pointerId); }} onPointerMove={(event) => { if(event.buttons===0)return; const r=event.currentTarget.getBoundingClientRect(); const x=(event.clientX-r.left)/r.width*400-200; const y=(event.clientY-r.top)/r.height*400-200; let a=Math.atan2(x,-y)*180/Math.PI; if(a<0)a+=360; setClockMinutes(Math.floor(clockMinutes/60)*60+(Math.round(a/6)%60)); }}>
+          <svg className="analog-clock" viewBox="0 0 400 400" role="slider" aria-label="Analoguhr: Minutenzeiger verschieben" onPointerDown={(event) => { const r=event.currentTarget.getBoundingClientRect(); const x=(event.clientX-r.left)/r.width*400-200; const y=(event.clientY-r.top)/r.height*400-200; let a=Math.atan2(x,-y)*180/Math.PI; if(a<0)a+=360; clockDragRef.current={angle:a,minutes:clockMinutes}; event.currentTarget.setPointerCapture(event.pointerId); }} onPointerMove={(event) => { if(!clockDragRef.current || !event.currentTarget.hasPointerCapture(event.pointerId))return; const r=event.currentTarget.getBoundingClientRect(); const x=(event.clientX-r.left)/r.width*400-200; const y=(event.clientY-r.top)/r.height*400-200; let a=Math.atan2(x,-y)*180/Math.PI; if(a<0)a+=360; let delta=a-clockDragRef.current.angle; if(delta>180)delta-=360; if(delta< -180)delta+=360; clockDragRef.current.angle=a; clockDragRef.current.minutes=(clockDragRef.current.minutes+delta/6+720)%720; setClockMinutes(Math.round(clockDragRef.current.minutes)%720); }} onPointerUp={() => { clockDragRef.current=null; }} onPointerCancel={() => { clockDragRef.current=null; }}>
             <circle cx="200" cy="200" r="190" className="clock-face" />
             {Array.from({length:60},(_,i)=><line key={i} x1="200" y1={i%5===0?24:29} x2="200" y2={i%5===0?43:36} transform={`rotate(${i*6} 200 200)`} className={i%5===0?"clock-hour-tick":"clock-minute-tick"} />)}
             {Array.from({length:12},(_,i)=>{const a=i*Math.PI/6;return <text key={i} x={200+145*Math.sin(a)} y={200-145*Math.cos(a)+9} className="clock-number">{i===0?12:i}</text>;})}
