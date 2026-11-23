@@ -85,6 +85,17 @@ function lowercaseCoverStyle(filename: string): CSSProperties {
   } as CSSProperties;
 }
 
+function clockPointerAngle(svg: SVGSVGElement, clientX: number, clientY: number) {
+  const matrix = svg.getScreenCTM();
+  if (!matrix) return 0;
+  const point = svg.createSVGPoint();
+  point.x = clientX;
+  point.y = clientY;
+  const local = point.matrixTransform(matrix.inverse());
+  const angle = Math.atan2(local.x - 200, 200 - local.y) * 180 / Math.PI;
+  return (angle + 360) % 360;
+}
+
 function makeLetterRound(enabledLetters: string[], previousWord?: string) {
   const availablePictures = letterPictures.filter((file) => enabledLetters.includes(imageLetter(file)));
   if (!availablePictures.length) return null;
@@ -414,7 +425,7 @@ export default function Home() {
         <section className="clock-game">
           <div className="game-toolbar"><button className="game-back" onClick={() => setShowClock(false)}>← Zurück</button><span className="game-label">UHRZEIT-SPIEL</span></div>
           <h1 className="game-prompt">Wie spät ist es?</h1><p className="game-hint">Ziehe den Minutenzeiger auf die gewünschte Uhrzeit.</p>
-          <svg className="analog-clock" viewBox="0 0 400 400" role="slider" aria-label="Analoguhr: Minutenzeiger verschieben" onPointerDown={(event) => { const r=event.currentTarget.getBoundingClientRect(); const x=(event.clientX-r.left)/r.width*400-200; const y=(event.clientY-r.top)/r.height*400-200; let a=Math.atan2(x,-y)*180/Math.PI; if(a<0)a+=360; clockDragRef.current={angle:a,minutes:clockMinutes}; event.currentTarget.setPointerCapture(event.pointerId); }} onPointerMove={(event) => { if(!clockDragRef.current || !event.currentTarget.hasPointerCapture(event.pointerId))return; const r=event.currentTarget.getBoundingClientRect(); const x=(event.clientX-r.left)/r.width*400-200; const y=(event.clientY-r.top)/r.height*400-200; let a=Math.atan2(x,-y)*180/Math.PI; if(a<0)a+=360; let delta=a-clockDragRef.current.angle; if(delta>180)delta-=360; if(delta< -180)delta+=360; clockDragRef.current.angle=a; clockDragRef.current.minutes=(clockDragRef.current.minutes+delta/6+720)%720; setClockMinutes(Math.round(clockDragRef.current.minutes)%720); }} onPointerUp={() => { clockDragRef.current=null; }} onPointerCancel={() => { clockDragRef.current=null; }}>
+          <svg className="analog-clock" viewBox="0 0 400 400" role="slider" aria-label="Analoguhr: Minutenzeiger verschieben" aria-valuemin={0} aria-valuemax={719} aria-valuenow={clockMinutes} onPointerDown={(event) => { const angle = clockPointerAngle(event.currentTarget, event.clientX, event.clientY); clockDragRef.current = { angle, minutes: clockMinutes }; event.currentTarget.setPointerCapture(event.pointerId); }} onPointerMove={(event) => { const drag = clockDragRef.current; if (!drag || !event.currentTarget.hasPointerCapture(event.pointerId)) return; const angle = clockPointerAngle(event.currentTarget, event.clientX, event.clientY); let delta = angle - drag.angle; if (delta > 180) delta -= 360; if (delta < -180) delta += 360; drag.angle = angle; drag.minutes = (drag.minutes + delta / 6 + 720) % 720; setClockMinutes(Math.round(drag.minutes) % 720); }} onPointerUp={(event) => { clockDragRef.current = null; if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); }} onPointerCancel={() => { clockDragRef.current = null; }}>
             <circle cx="200" cy="200" r="190" className="clock-face" />
             {Array.from({length:60},(_,i)=><line key={i} x1="200" y1={i%5===0?24:29} x2="200" y2={i%5===0?43:36} transform={`rotate(${i*6} 200 200)`} className={i%5===0?"clock-hour-tick":"clock-minute-tick"} />)}
             {Array.from({length:12},(_,i)=>{const a=i*Math.PI/6;return <text key={i} x={200+145*Math.sin(a)} y={200-145*Math.cos(a)+9} className="clock-number">{i===0?12:i}</text>;})}
@@ -423,7 +434,7 @@ export default function Home() {
             <circle cx="200" cy="200" r="11" className="clock-pin" />
           </svg>
           <div className="clock-readout">{String(Math.floor(clockMinutes/60)%12||12).padStart(2,"0")}:{String(clockMinutes%60).padStart(2,"0")} Uhr</div>
-          <button className="clock-speak-button" onClick={() => { const h=Math.floor(clockMinutes/60)%24; const m=clockMinutes%60; void speak(m===0 ? `${h} Uhr` : `${h} Uhr ${m} Minuten`); }}>Uhrzeit vorlesen</button>
+          <button className="clock-speak-button" onClick={() => { const h=Math.floor(clockMinutes/60)%12||12; const m=clockMinutes%60; void speak(m===0 ? `${h} Uhr` : `${h} Uhr ${m} Minuten`); }}>Uhrzeit vorlesen</button>
         </section>
       ) : showDice ? (
         <section className="dice-game">
