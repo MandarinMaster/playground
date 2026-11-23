@@ -167,6 +167,8 @@ function playCelebration() {
 export default function Home() {
   const [playing, setPlaying] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
+  const [showClock, setShowClock] = useState(false);
+  const [clockMinutes, setClockMinutes] = useState(180);
   const [showHomeSettings, setShowHomeSettings] = useState(false);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [allAvailableVoices, setAllAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
@@ -367,7 +369,15 @@ export default function Home() {
 
   return (
     <main className="start-screen">
-      {!playing ? (showHomeSettings && !showLibrary && !showDice ? (
+      {showLibrary ? (
+        <section className={`library-screen${showLowercaseInLibrary ? " show-lowercase" : ""}`}>
+          <div className="game-toolbar"><button className="game-back" onClick={() => setShowLibrary(false)}>← Zurück</button><span className="game-label">BUCHSTABEN-EINSTELLUNGEN</span></div>
+          <h1 className="game-prompt">Buchstaben verwalten</h1><p className="game-hint">Lege fest, welche Buchstaben im Buchstabenspiel vorkommen dürfen.</p>
+          <div className="library-display-control"><button className="library-toggle-lowercase" onClick={() => setShowLowercaseInLibrary(v => !v)} aria-pressed={showLowercaseInLibrary}>{showLowercaseInLibrary ? "Kleinbuchstaben ausblenden" : "Kleinbuchstaben einblenden"}</button></div>
+          <div className="library-grid">{letterPictures.map(filename => { const letter = imageLetter(filename); const active = enabledLetters.includes(letter); return <button key={filename} className={`library-card${active ? " active" : ""}`} onClick={() => toggleLibraryLetter(letter)} aria-pressed={active}><span className="library-image-wrap" style={lowercaseCoverStyle(filename)}><img src={`/bilder/${encodeURIComponent(filename)}`} alt={filename.replace(/\.jpg$/i, "")} /><span className="lowercase-cover" aria-hidden="true" /></span><span className="library-letter">{letter}</span><span className="library-check">{active ? "✓" : "+"}</span></button>; })}</div>
+          <div className="library-footer"><span>{enabledLetters.length} von 26 Buchstaben ausgewählt</span><button className="library-done" onClick={() => setShowLibrary(false)}>Fertig</button></div>
+        </section>
+      ) : !playing ? (showHomeSettings && !showLibrary && !showDice ? (
         <section className="home-settings-screen">
           <div className="game-toolbar"><button className="game-back" onClick={() => setShowHomeSettings(false)}>← Zurück</button><span className="game-label">APP-EINSTELLUNGEN</span></div>
           <h1 className="game-prompt">Sprechstimme</h1>
@@ -399,47 +409,20 @@ export default function Home() {
           </section>
           <p className="voice-note">Die verfügbaren Stimmen hängen von deinem Gerät und Browser ab. Deine Auswahl wird auf diesem Gerät gespeichert.</p>
         </section>
-      ) : showLibrary ? (
-        <section className={`library-screen${showLowercaseInLibrary ? " show-lowercase" : ""}`}>
-          
-          <div className="game-toolbar">
-            <button className="game-back" onClick={() => setShowLibrary(false)}>← Zurück</button>
-            <span className="game-label">BUCHSTABEN-BIBLIOTHEK</span>
-          </div>
-          <h1 className="game-prompt">Deine Buchstaben</h1>
-          <p className="game-hint">Wähle die Tierbilder aus, deren Buchstaben im Spiel vorkommen dürfen.</p>
-          <div className="library-display-control"><button className="library-toggle-lowercase" onClick={() => setShowLowercaseInLibrary((value) => !value)} aria-pressed={showLowercaseInLibrary}>{showLowercaseInLibrary ? "Kleinbuchstaben ausblenden" : "Kleinbuchstaben einblenden"}</button></div>
-          <div className="library-grid">
-            {letterPictures.map((filename) => {
-              const letter = imageLetter(filename);
-              const active = enabledLetters.includes(letter);
-              return <button key={filename} className={`library-card${active ? " active" : ""}`} onClick={() => toggleLibraryLetter(letter)} aria-pressed={active} aria-label={`${letter} ${active ? "deaktivieren" : "aktivieren"}`}>
-                <span className="library-image-wrap" style={lowercaseCoverStyle(filename)}>
-                  <img src={`/bilder/${encodeURIComponent(filename)}`} alt={filename.replace(/\\.jpg$/i, "")}
-                    onLoad={(event) => {
-                      const img = event.currentTarget;
-                      try {
-                        const canvas = document.createElement("canvas");
-                        canvas.width = 1;
-                        canvas.height = 1;
-                        const context = canvas.getContext("2d", { willReadFrequently: true });
-                        if (!context) return;
-                        context.drawImage(img, Math.floor(img.naturalWidth * 0.94), Math.floor(img.naturalHeight * 0.1), 1, 1, 0, 0, 1, 1);
-                        const [red, green, blue] = context.getImageData(0, 0, 1, 1).data;
-                        img.parentElement?.style.setProperty("--letter-cover", `rgb(${red}, ${green}, ${blue})`);
-                      } catch {}
-                    }} />
-                  <span className="lowercase-cover" aria-hidden="true" />
-                </span>
-                <span className="library-letter">{letter}</span>
-                <span className="library-check">{active ? "✓" : "+"}</span>
-              </button>;
-            })}
-          </div>
-          <div className="library-footer">
-            <span>{enabledLetters.length} von 26 Buchstaben ausgewählt</span>
-            <button className="library-done" onClick={() => setShowLibrary(false)}>Fertig</button>
-          </div>
+      ) : showClock ? (
+        <section className="clock-game">
+          <div className="game-toolbar"><button className="game-back" onClick={() => setShowClock(false)}>← Zurück</button><span className="game-label">UHRZEIT-SPIEL</span></div>
+          <h1 className="game-prompt">Wie spät ist es?</h1><p className="game-hint">Ziehe den Minutenzeiger auf die gewünschte Uhrzeit.</p>
+          <svg className="analog-clock" viewBox="0 0 400 400" role="slider" aria-label="Analoguhr: Minutenzeiger verschieben" onPointerDown={(event) => { const r=event.currentTarget.getBoundingClientRect(); const x=(event.clientX-r.left)/r.width*400-200; const y=(event.clientY-r.top)/r.height*400-200; let a=Math.atan2(x,-y)*180/Math.PI; if(a<0)a+=360; setClockMinutes(Math.floor(clockMinutes/60)*60+(Math.round(a/6)%60)); event.currentTarget.setPointerCapture(event.pointerId); }} onPointerMove={(event) => { if(event.buttons===0)return; const r=event.currentTarget.getBoundingClientRect(); const x=(event.clientX-r.left)/r.width*400-200; const y=(event.clientY-r.top)/r.height*400-200; let a=Math.atan2(x,-y)*180/Math.PI; if(a<0)a+=360; setClockMinutes(Math.floor(clockMinutes/60)*60+(Math.round(a/6)%60)); }}>
+            <circle cx="200" cy="200" r="190" className="clock-face" />
+            {Array.from({length:60},(_,i)=><line key={i} x1="200" y1={i%5===0?24:29} x2="200" y2={i%5===0?43:36} transform={`rotate(${i*6} 200 200)`} className={i%5===0?"clock-hour-tick":"clock-minute-tick"} />)}
+            {Array.from({length:12},(_,i)=>{const a=i*Math.PI/6;return <text key={i} x={200+145*Math.sin(a)} y={200-145*Math.cos(a)+9} className="clock-number">{i===0?12:i}</text>;})}
+            <line x1="200" y1="200" x2="200" y2="92" className="clock-hour-hand" transform={`rotate(${(clockMinutes/60%12)*30+(clockMinutes%60)*.5} 200 200)`} />
+            <line x1="200" y1="218" x2="200" y2="48" className="clock-minute-hand" transform={`rotate(${clockMinutes%60*6} 200 200)`} />
+            <circle cx="200" cy="200" r="11" className="clock-pin" />
+          </svg>
+          <div className="clock-readout">{String(Math.floor(clockMinutes/60)%12||12).padStart(2,"0")}:{String(clockMinutes%60).padStart(2,"0")} Uhr</div>
+          <button className="clock-speak-button" onClick={() => { const h=Math.floor(clockMinutes/60)%24; const m=clockMinutes%60; void speak(m===0 ? `${h} Uhr` : `${h} Uhr ${m} Minuten`); }}>Uhrzeit vorlesen</button>
         </section>
       ) : showDice ? (
         <section className="dice-game">
@@ -479,7 +462,7 @@ export default function Home() {
             <span className="tile-symbol" aria-hidden="true">♡</span>
             <span className="tile-number">Buchstaben</span>
           </button>
-          <button className="start-tile tile-rose" onClick={() => setShowLibrary(true)} aria-label="Buchstaben-Bibliothek öffnen"><span className="tile-symbol">▤</span><span className="tile-number">Bibliothek</span></button>
+          <button className="start-tile tile-rose" onClick={() => { setClockMinutes(180); setShowClock(true); }} aria-label="Uhrzeit-Spiel starten"><span className="tile-symbol">◷</span><span className="tile-number">Uhrzeit</span></button>
           <button className="start-tile tile-lilac" onClick={() => { setDiceValues([1, 1]); setShowDice(true); }} aria-label="Würfel öffnen"><span className="tile-symbol">⚄</span><span className="tile-number">Würfeln</span></button>
           </div>
         </div>
@@ -508,7 +491,7 @@ export default function Home() {
         <section className="number-game letter-game">
           <div className="game-toolbar">
             <button className="game-back" onClick={goHome}>← Zurück</button>
-            <span className="game-label">BUCHSTABEN-SPIEL</span>
+            <button className="dice-settings-button" onClick={() => setShowLibrary(true)}>Einstellungen</button>
           </div>
           <h1 className="game-prompt" aria-live="polite">{message}</h1>
           <p className="game-hint">Schau dir den Buchstaben an. Tippe darauf für den nächsten.</p>
