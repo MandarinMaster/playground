@@ -85,6 +85,32 @@ function lowercaseCoverStyle(filename: string): CSSProperties {
   } as CSSProperties;
 }
 
+function germanNumber(value: number): string {
+  const ones = ["null", "eins", "zwei", "drei", "vier", "fünf", "sechs", "sieben", "acht", "neun"];
+  const teens = ["zehn", "elf", "zwölf", "dreizehn", "vierzehn", "fünfzehn", "sechzehn", "siebzehn", "achtzehn", "neunzehn"];
+  const tens = ["", "", "zwanzig", "dreißig", "vierzig", "fünfzig"];
+  if (value < 10) return ones[value];
+  if (value < 20) return teens[value - 10];
+  const unit = value % 10;
+  return unit === 0 ? tens[Math.floor(value / 10)] : `${ones[unit] === "eins" ? "ein" : ones[unit]}und${tens[Math.floor(value / 10)]}`;
+}
+
+function germanClockAnnouncement(totalMinutes: number): string {
+  const minute = totalMinutes % 60;
+  const hour = Math.floor(totalMinutes / 60) % 12 || 12;
+  const nextHour = hour === 12 ? 1 : hour + 1;
+  const hourWord = (n: number) => n === 1 ? "eins" : germanNumber(n);
+  const halfWord = hourWord(nextHour);
+  if (minute === 0) return `${hourWord(hour)} Uhr`;
+  if (minute === 15) return `viertel nach ${hourWord(hour)}`;
+  if (minute === 30) return `halb ${halfWord}`;
+  if (minute === 45) return `viertel vor ${hourWord(nextHour)}`;
+  if (minute < 15) return `${germanNumber(minute)} nach ${hourWord(hour)}`;
+  if (minute < 30) return `${germanNumber(30 - minute)} vor halb ${halfWord}`;
+  if (minute < 45) return `${germanNumber(minute - 30)} nach halb ${halfWord}`;
+  return `${germanNumber(60 - minute)} vor ${hourWord(nextHour)}`;
+}
+
 function clockPointerAngle(svg: SVGSVGElement, clientX: number, clientY: number) {
   const matrix = svg.getScreenCTM();
   if (!matrix) return 0;
@@ -435,7 +461,7 @@ export default function Home() {
             <circle cx="200" cy="200" r="11" className="clock-pin" />
           </svg>
           <div className="clock-readout">{String(Math.floor(clockMinutes/60)%12||12).padStart(2,"0")}:{String(clockMinutes%60).padStart(2,"0")} Uhr</div>
-          <button className="clock-speak-button" onClick={() => { const h=Math.floor(clockMinutes/60)%12||12; const m=clockMinutes%60; void speak(m===0 ? `${h} Uhr` : `${h} Uhr ${m} Minuten`); }}>Uhrzeit vorlesen</button>
+          <button className="clock-speak-button" onClick={() => { void speak(germanClockAnnouncement(clockMinutes)); }}>Uhrzeit vorlesen</button>
         </section>
       ) : showDice ? (
         <section className="dice-game">
