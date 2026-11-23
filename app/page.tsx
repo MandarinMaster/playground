@@ -171,6 +171,7 @@ export default function Home() {
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [allAvailableVoices, setAllAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoiceURI, setSelectedVoiceURI] = useState("");
+  const [thorstenStatus, setThorstenStatus] = useState("Noch nicht geladen. Beim ersten Einsatz werden Sprachmodell und Rechenkern heruntergeladen.");
   const [showDice, setShowDice] = useState(false);
   const [showDiceSettings, setShowDiceSettings] = useState(false);
   const [diceCount, setDiceCount] = useState(2);
@@ -194,7 +195,25 @@ export default function Home() {
     setDiceRollKey((key) => key + 1);
   }
 
-  function speak(text: string) {
+  async function speak(text: string) {
+    if (selectedVoiceURI === "piper:thorsten") {
+      try {
+        setThorstenStatus("Thorsten wird vorbereitet …");
+        window.speechSynthesis?.cancel();
+        const piper = await import("@realtimex/piper-tts-web");
+        const wav = await piper.predict({ text, voiceId: "de_DE-thorsten-medium" });
+        const audioUrl = URL.createObjectURL(wav);
+        const audio = new Audio(audioUrl);
+        audio.onended = () => URL.revokeObjectURL(audioUrl);
+        audio.onerror = () => { URL.revokeObjectURL(audioUrl); setThorstenStatus("Die Wiedergabe ist fehlgeschlagen."); };
+        await audio.play();
+        setThorstenStatus("Thorsten ist bereit.");
+      } catch (error) {
+        console.error("Thorsten TTS:", error);
+        setThorstenStatus("Thorsten konnte nicht geladen werden. Bitte Internetverbindung prüfen und erneut versuchen.");
+      }
+      return;
+    }
     if (!( "speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
@@ -292,7 +311,8 @@ export default function Home() {
       const germanVoices = allVoices.filter((voice) => voice.lang.toLowerCase().startsWith("de")).sort((a, b) => a.name.localeCompare(b.name, "de"));
       setAvailableVoices(germanVoices);
       const savedVoice = window.localStorage.getItem("playground-speech-voice");
-      if (savedVoice && germanVoices.some((voice) => voice.voiceURI === savedVoice)) setSelectedVoiceURI(savedVoice);
+      if (savedVoice === "piper:thorsten") setSelectedVoiceURI(savedVoice);
+      else if (savedVoice && germanVoices.some((voice) => voice.voiceURI === savedVoice)) setSelectedVoiceURI(savedVoice);
       else if (!selectedVoiceURI && germanVoices.length) {
         const preferred = germanVoices.find((voice) => /natural|online|google|katja|anna/i.test(voice.name)) ?? germanVoices[0];
         setSelectedVoiceURI(preferred.voiceURI);
@@ -355,11 +375,13 @@ export default function Home() {
           {availableVoices.length ? (
             <>
               <select className="voice-select" aria-label="Deutsche Sprechstimme" value={selectedVoiceURI} onChange={(event) => setSelectedVoiceURI(event.target.value)}>
+                <option value="piper:thorsten">Thorsten (Piper · neural, lokal)</option>
                 {availableVoices.map((voice) => <option key={voice.voiceURI} value={voice.voiceURI}>{voice.name} ({voice.lang} · {voice.localService ? "lokal" : "Netzwerk"}{voice.default ? " · Standard" : ""} · {voice.voiceURI.slice(-18)})</option>)}
               </select>
-              <button className="voice-preview-button" onClick={() => speak("Hallo! Ich freue mich, mit dir zu lernen. Wie schreibt man Katze?")}>Stimme anhören</button>
+              <button className="voice-preview-button" onClick={() => void speak("Hallo! Ich freue mich, mit dir zu lernen. Wie schreibt man Katze?")}>Stimme anhören</button>
+              {selectedVoiceURI === "piper:thorsten" && <p className="voice-note" aria-live="polite">{thorstenStatus}</p> }
             </>
-          ) : <p className="voice-unavailable">Es wurden noch keine deutschen Gerätestimmen gefunden. Bitte prüfe die Sprach- und Stimmeinstellungen deines Geräts.</p>}
+          ) : <><select className="voice-select" aria-label="Deutsche Sprechstimme" value={selectedVoiceURI} onChange={(event) => setSelectedVoiceURI(event.target.value)}><option value="piper:thorsten">Thorsten (Piper · neural, lokal)</option></select><button className="voice-preview-button" onClick={() => void speak("Hallo! Ich freue mich, mit dir zu lernen. Wie schreibt man Katze?")}>Stimme anhören</button><p className="voice-note">{thorstenStatus}</p><p className="voice-unavailable">Es wurden keine deutschen Gerätestimmen gefunden.</p></> }
           <section className="voice-diagnostics">
             <h2>Erkannte Gerätestimmen</h2>
             <p>Insgesamt: {allAvailableVoices.length} · Deutsch: {availableVoices.length}</p>
