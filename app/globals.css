@@ -565,3 +565,16 @@ body:has(.dice-game) .start-screen:has(.dice-game) {
 }
 .voice-diagnostics-list li { margin:0 0 12px; overflow-wrap:anywhere; }
 .voice-diagnostics-list small { display:block; margin-top:3px; opacity:.8; font-size:11px; }
+
+
+/* Interactive analog clock learning game */
+.clock-game { width:min(620px,100%); min-height:calc(100vh - 50px); display:flex; flex-direction:column; align-items:center; }
+.clock-game .game-prompt { margin-top:clamp(22px,5vh,48px); }
+.analog-clock { width:min(82vw,430px); max-height:52vh; margin:14px auto 8px; touch-action:none; cursor:grab; user-select:none; }
+.clock-face { fill:#fffdf4; stroke:#7b55b5; stroke-width:9; filter:drop-shadow(0 10px 16px rgba(49,20,83,.24)); }
+.clock-hour-tick { stroke:#65418f; stroke-width:5; stroke-linecap:round; } .clock-minute-tick { stroke:#b8a7ca; stroke-width:2; }
+.clock-number { fill:#493064; font:bold 25px Nunito,sans-serif; text-anchor:middle; }
+.clock-hour-hand { stroke:#493064; stroke-width:12; stroke-linecap:round; } .clock-minute-hand { stroke:#e34d9d; stroke-width:7; stroke-linecap:round; } .clock-pin { fill:#f2a3cf; stroke:#493064; stroke-width:4; }
+.clock-readout { margin:8px 0 16px; color:white; font-size:clamp(27px,6vw,38px); font-weight:900; text-shadow:0 3px 10px rgba(65,30,100,.28); }
+.clock-speak-button { min-width:220px; padding:15px 25px; border:2px solid white; border-radius:99px; background:linear-gradient(145deg,#ffb8e2,#d85eae); color:white; font-size:19px; font-weight:900; cursor:pointer; box-shadow:0 6px 0 rgba(125,48,125,.24),0 10px 20px rgba(73,34,113,.18); }
+@media(max-width:600px) { .clock-game { min-height:calc(100vh - 48px); } .analog-clock { width:min(88vw,390px); max-height:48vh; } }
