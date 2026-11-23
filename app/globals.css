@@ -578,3 +578,22 @@ body:has(.dice-game) .start-screen:has(.dice-game) {
 .clock-readout { margin:8px 0 16px; color:white; font-size:clamp(27px,6vw,38px); font-weight:900; text-shadow:0 3px 10px rgba(65,30,100,.28); }
 .clock-speak-button { min-width:220px; padding:15px 25px; border:2px solid white; border-radius:99px; background:linear-gradient(145deg,#ffb8e2,#d85eae); color:white; font-size:19px; font-weight:900; cursor:pointer; box-shadow:0 6px 0 rgba(125,48,125,.24),0 10px 20px rgba(73,34,113,.18); }
 @media(max-width:600px) { .clock-game { min-height:calc(100vh - 48px); } .analog-clock { width:min(88vw,390px); max-height:48vh; } }
+
+/* Kinderfreundliches Zifferblatt */
+.clock-game .game-prompt { color:#fffdfd; text-shadow:0 3px 0 rgba(105,65,145,.18),0 5px 14px rgba(65,30,100,.2); }
+.analog-clock { overflow:visible; filter:drop-shadow(0 12px 15px rgba(66,42,105,.2)); }
+.clock-face { fill:url(#clockFaceGradient); stroke:#ffb5d7; stroke-width:11; filter:drop-shadow(0 5px 0 rgba(145,87,154,.12)); }
+.clock-inner-ring { fill:none; stroke:#bde9e6; stroke-width:3; stroke-dasharray:3 8; opacity:.95; }
+.clock-hour-tick { stroke:#f18ab9; stroke-width:7; stroke-linecap:round; }
+.clock-minute-tick { stroke:#a8cbd8; stroke-width:2.5; stroke-linecap:round; }
+.clock-number-badge { fill:#ffe3a6; stroke:#fff; stroke-width:3; filter:drop-shadow(0 2px 1px rgba(83,55,103,.13)); }
+.clock-game .analog-clock g:nth-of-type(3n + 1) .clock-number-badge { fill:#ffd8e9; }
+.clock-game .analog-clock g:nth-of-type(3n + 2) .clock-number-badge { fill:#d5f2ed; }
+.clock-game .analog-clock g:nth-of-type(3n) .clock-number-badge { fill:#dce9ff; }
+.clock-number { fill:#493064; font:bold 27px Nunito,sans-serif; paint-order:stroke; stroke:#fffdf7; stroke-width:1px; text-anchor:middle; }
+.clock-hour-hand { stroke:#7551a8; stroke-width:15; stroke-linecap:round; filter:drop-shadow(0 2px 1px rgba(65,35,95,.2)); }
+.clock-minute-hand { stroke:#ff69ad; stroke-width:9; stroke-linecap:round; filter:drop-shadow(0 2px 1px rgba(160,55,112,.24)); }
+.clock-pin { fill:#ffd36e; stroke:#fff; stroke-width:5; }
+.clock-readout { padding:9px 20px; border:2px solid rgba(255,255,255,.9); border-radius:20px; background:rgba(255,255,255,.2); box-shadow:0 4px 0 rgba(90,55,130,.12); }
+.clock-speak-button { border-color:#fff; background:linear-gradient(145deg,#ffacd2,#e96eaa); box-shadow:0 7px 0 #b94d8b,0 11px 20px rgba(73,34,113,.18),inset 0 2px 4px rgba(255,255,255,.7); }
+.clock-speak-button:active { transform:translateY(4px); box-shadow:0 3px 0 #b94d8b; }
