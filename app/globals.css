@@ -529,3 +529,16 @@ body:has(.dice-game) .start-screen:has(.dice-game) {
   .home-settings-screen { min-height:calc(100vh - 48px); }
   .voice-select { font-size:14px; }
 }
+
+
+/* One-at-a-time letter familiarization */
+.letter-board:has(.picture-tile:only-child) {
+  width:min(360px,78vw);
+  grid-template-columns:minmax(0,1fr);
+  justify-items:center;
+  margin:clamp(22px,5vh,42px) auto 12px;
+}
+.letter-board:has(.picture-tile:only-child) .picture-tile {
+  width:100%;
+  aspect-ratio:3 / 4;
+}
