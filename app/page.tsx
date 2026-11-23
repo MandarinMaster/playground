@@ -105,7 +105,7 @@ function germanClockAnnouncement(totalMinutes: number): string {
   if (minute === 15) return `viertel nach ${hourWord(hour)}`;
   if (minute === 30) return `halb ${halfWord}`;
   if (minute === 45) return `viertel vor ${hourWord(nextHour)}`;
-  if (minute < 15) return `${germanNumber(minute)} nach ${hourWord(hour)}`;
+  if (minute <= 20) return `${germanNumber(minute)} nach ${hourWord(hour)}`;
   if (minute < 30) return `${germanNumber(30 - minute)} vor halb ${halfWord}`;
   if (minute < 45) return `${germanNumber(minute - 30)} nach halb ${halfWord}`;
   return `${germanNumber(60 - minute)} vor ${hourWord(nextHour)}`;
